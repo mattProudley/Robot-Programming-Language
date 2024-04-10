@@ -1,4 +1,4 @@
-As this is my first project utilising git cli interface, these
+As this is my first project utilising git, these
 commands are here for my personal reference.
 
 Pull branch: git pull origin "branch"
@@ -7,6 +7,7 @@ Commit changes to branch: git commit -m “commit title”
 Push branch to HUB: git push -u origin "branch"
 Change working branch: git checkout "branch"
 New branch: git branch "name"
+Show working branch: git branch --Starred is current
 
 Clone Repository: Git clone “URL”
 Reset origin: git remote set-url origin "url"

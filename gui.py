@@ -5,7 +5,7 @@ from file_handling import save_file, open_file
 # Function to handle the "Open" menu command
 def open_file_command():
     open_file(text_area)
-    terminal.insert(tk.END, "File opened\n")
+    terminal.insert(tk.END, "File opened\n") # TODO: make this a global function and allow text colour control
 
 # Function to handle the "Save" menu command
 def save_file_command():
