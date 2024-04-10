@@ -1,7 +1,10 @@
-Add all files: git add .
+As this is my first project utilising git cli interface, these
+commands are here for my personal reference .
+
+Pull branch: git pull origin "branch"
+Add all files to staging area: git add .
 Commit changes: git commit -m “commit title”
 Push to branch: git push -u origin "branch"
 
 Clone Repository: Git clone “URL”
-
 Reset origin: git remote set-url origin "url"
