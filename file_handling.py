@@ -1,33 +1,33 @@
 # Functions related to file management
-from tkinter import filedialog, messagebox
+from tkinter import filedialog
 
 
-def save_file(text_area):
-    """Function to save the text from the text area to a file."""
-    # Get the text from the text area
-    text = text_area.get("1.0", "end-1c")
+def save_file(data):
+    """Function to save data as a text file."""
     # Prompt the user to select a file path for saving
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
     # If a file path is provided by the user
     if file_path:
-        # Write the text to the selected file
+        # Write the text to the selected file and return message
         with open(file_path, "w") as f:
-            f.write(text)
-        # Clear the text area after saving
-        text_area.delete("1.0", "end")
-        # Show a message box indicating successful saving
-        messagebox.showinfo("Saved", "Batch File Saved")
+            f.write(data)
+        return "File saved"
+    # Else return error
+    else:
+        return "File not saved"
 
 
-def open_file(text_area):
-    """Function to open a file and populate the text area with its contents."""
+def open_file():
+    """Function to open a file and return data"""
     # Prompt the user to select a file to open
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     # If a file path is provided by the user
     if file_path:
-        # Open the selected file in read mode
-        with open(file_path, "r") as f:
-            # Clear the current contents of the text area
-            text_area.delete("1.0", "end")
-            # Insert the contents of the file into the text area
-            text_area.insert("1.0", f.read())
+        # Open the selected file in read mode and return data then message
+        with open(file_path, "r") as file:
+            data = file.read()
+            return data, "File Opened"
+    # Else returns null data and error
+    else:
+        data = None
+        return data, "No file selected"
