@@ -17,7 +17,6 @@ def save_file(data):
     else:
         return "File not saved"
 
-
 # Function handles opening files
 def open_file():
     """Function to open a file and return data"""
