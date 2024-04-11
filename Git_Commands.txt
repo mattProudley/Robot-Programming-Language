@@ -2,7 +2,7 @@ As this is my first project utilising git, these
 commands are here for my personal reference.
 
 Pull branch: git pull origin "branch"
-Add all files to tracking: git add .
+Add all files to staging area: git add .
 Commit changes to branch: git commit -m “commit title”
 Push branch to HUB: git push -u origin "branch"     -f forces push
 Change working branch: git checkout "branch"
