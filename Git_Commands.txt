@@ -9,6 +9,8 @@ Change working branch: git checkout "branch"
 New branch: git branch "name"
 Show working branch: git branch --Starred is current
 
+Removed cached files from tracking: git rm -r --cached . -- Re add all once .gitignore is updated
+
 Clone Repository: Git clone “URL”
 Reset origin: git remote set-url origin "url"
 
