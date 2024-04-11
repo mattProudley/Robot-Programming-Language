@@ -13,4 +13,3 @@ Final Version Features
 Batch File Processing: Convert batch files into commands for robot control.
 Command Execution: Execute commands to control the robot's movement and actions.
 Sensor Integration: Retrieve sensor readings from the robot for monitoring and analysis.
-Navigation Feedback: Obtain navigation information to ensure precise movement and positioning.
