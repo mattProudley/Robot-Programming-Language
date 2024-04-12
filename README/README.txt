@@ -8,8 +8,9 @@ Additionally, it wil retrieve sensor readings and navigation information from th
 Current Version Features:
 Text Editor: Open Edit and Save text files.
 GUI: Functioning basic GUI for operation.
+WIP: Batch File Processing: Convert batch files into commands for robot control.
 
 Final Version Features
-Batch File Processing: Convert batch files into commands for robot control.
 Command Execution: Execute commands to control the robot's movement and actions.
 Sensor Integration: Retrieve sensor readings from the robot for monitoring and analysis.
+Syntax: Syntax is explained in a file

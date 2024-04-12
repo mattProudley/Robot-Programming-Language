@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import Menu, Text, Scrollbar
 from file_handling import save_file, open_file  # Import file_handling functions for file operations
+import interpreter
 
 
 class GUI:
@@ -31,7 +32,7 @@ class GUI:
         file_menu.add_command(label="Open", command=self.open_file_event)  # Add command to open file
         file_menu.add_command(label="Save", command=self.save_file_event)  # Add command to save file
         file_menu.add_separator()  # Separates options in the drop-down with a line
-        file_menu.add_command(label="Run")  # TODO: Placeholder for 'Run' command
+        file_menu.add_command(label="Run", command=self.run_file_event)
 
         # Create an "Edit" dropdown menu inside menu bar
         edit_menu = Menu(menu_bar, tearoff=False)
@@ -68,6 +69,12 @@ class GUI:
         message = save_file(data)  # Call function to save file and pass text...
         # ... function returns a message communicating success or error
         self.terminal.insert(tk.END, f"{message}\n")  # Display message in terminal
+
+
+    def run_file_event(self):
+        data = self.text_area.get("1.0", "end-1c")  # Get text from text area
+        interpreter.run_interpreter(data)  # Syntax check and compile
+        # Send Commands
 
     # Clears text area (seperated for readability)
     def clear_text_area(self):

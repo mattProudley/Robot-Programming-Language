@@ -1,1 +1,3 @@
-test typing
+MOV 90; TURNL 5; STOP;
+MOV 75; TURNR 10; STOP;
+MOV 100; TURNL 15; STOP;
