@@ -6,7 +6,7 @@
 # Preforms syntax checks and tokenizes batch files and commands
 import re
 
-# Patterns and matching tokens used for tokenization process, stored in an 2D array (for now)
+# Patterns and matching tokens used for tokenization process
 patterns = [
     r'MOV\s+(\d+)',  # MOV command
     r'TURNL\s+(\d+)',  # TURN LEFT command
