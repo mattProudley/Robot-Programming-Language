@@ -4,6 +4,9 @@ The final software will be designed to control a robot vehicle through simple co
 It will read batch files and translate them into commands that drive the robot.
 Additionally, it wil retrieve sensor readings and navigation information from the robot.
 
+Tokenization of the language takes place using the python program.
+The generated tokens are sent to the robot where they are interpreted and trigger movement commands.
+
 
 Current Version Features:
 Text Editor: Open Edit and Save text files.

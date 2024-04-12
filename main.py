@@ -1,8 +1,8 @@
-# Main file and GUI constructor
+# GUI constructor and Event Handler
 import tkinter as tk
 from tkinter import Menu, Text, Scrollbar
 from file_handling import save_file, open_file  # Import file_handling functions for file operations
-import interpreter
+import command_parser
 
 
 class GUI:
@@ -55,9 +55,9 @@ class GUI:
     # Handles all GUI events for opening a file
     def open_file_event(self):
         # Open file and display result in terminal
-        data, message = open_file()  # Call function to open file...
+        data, terminal_message = open_file()  # Call function to open file...
         # ...function returns data and a message communicating success or error
-        self.terminal.insert(tk.END, f"{message}\n")  # Display message in terminal
+        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
         if data:
             self.clear_text_area()  # Clear existing text in text area
             self.text_area.insert("1.0", data)  # Insert file contents in text area
@@ -66,14 +66,15 @@ class GUI:
     def save_file_event(self):
         # Save file and display result in terminal
         data = self.text_area.get("1.0", "end-1c")  # Get text from text area
-        message = save_file(data)  # Call function to save file and pass text...
+        terminal_message = save_file(data)  # Call function to save file and pass text...
         # ... function returns a message communicating success or error
-        self.terminal.insert(tk.END, f"{message}\n")  # Display message in terminal
+        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
 
 
     def run_file_event(self):
         data = self.text_area.get("1.0", "end-1c")  # Get text from text area
-        interpreter.run_interpreter(data)  # Syntax check and compile
+        terminal_message = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
+        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
         # Send Commands
 
     # Clears text area (seperated for readability)
