@@ -18,6 +18,9 @@ class GUI:
         # Set window title
         self.root.title("Robot Programmer")
 
+        # Set the default size of the window
+        self.root.geometry("800x600")  # Set the width to 800 pixels and height to 600 pixels
+
         # Create a text area widget for input
         self.text_area = Text(self.root, bg="black", fg="white")
         self.text_area.pack(fill=tk.BOTH, expand=True)
@@ -72,13 +75,11 @@ class GUI:
 
     def run_file_event(self):
         data = self.get_text_area()
-        if data:
-            result = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
-            if result.data:
-                bluetooth.send(result.data)
-            if result.msg:
-                self.terminal_print(result.msg)
-        else: self.terminal_print("Error: Blank File")
+        result = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
+        if result.data:
+            bluetooth.send(result.data)
+        if result.msg:
+            self.terminal_print(result.msg)
 
     # Clears text area (seperated for readability)
     def clear_text_area(self):
