@@ -4,7 +4,6 @@ from tkinter import Menu, Text, Scrollbar
 from file_handling import save_file, open_file  # Import file_handling functions for file operations
 import command_parser
 import bluetooth
-from utils import Error
 
 class GUI:
     def __init__(self):
@@ -56,36 +55,42 @@ class GUI:
     # Handles all GUI events for opening a file
     def open_file_event(self):
         # Open file and display result in terminal
-        data, terminal_message = open_file()  # Call function to open file...
+        result = open_file()  # Call function to open file...
         # ...function returns data and a message communicating success or error
-        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
-        if data:
-            self.clear_text_area()  # Clear existing text in text area
-            self.text_area.insert("1.0", data)  # Insert file contents in text area
+        if result.data:
+            self.set_text_area(result.data)
+        if result.msg:
+            self.terminal_print(result.msg)
 
     # Handles events for saving a file
     def save_file_event(self):
         # Save file and display result in terminal
-        data = self.text_area.get("1.0", "end-1c")  # Get text from text area
-        terminal_message: Error = save_file(data)  # Call function to save file and pass text...
+        result = save_file(self.get_text_area())  # Call function to save file and pass text...
         # ... function returns a message communicating success or error
-        if terminal_message:
-            self.terminal_print(terminal_message)
+        if result.msg:
+            self.terminal_print(result.msg)
 
     def run_file_event(self):
-        data = self.get_data()
-        tokens, terminal_message = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
-        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
-        if tokens:
-            bluetooth.send(tokens)
+        data = self.get_text_area()
+        if data:
+            result = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
+            if result.data:
+                bluetooth.send(result.data)
+            if result.msg:
+                self.terminal_print(result.msg)
+        else: self.terminal_print("Error: Blank File")
 
     # Clears text area (seperated for readability)
     def clear_text_area(self):
         # Clear text area
         self.text_area.delete("1.0", "end")
 
-    def get_data(self):
+    def get_text_area(self):
         return self.text_area.get("1.0", "end-1c")
+
+    def set_text_area(self, data):
+        self.clear_text_area()
+        self.text_area.insert("1.0", data)  # Insert file contents in text area
 
     def terminal_print(self, terminal_message):
         self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal

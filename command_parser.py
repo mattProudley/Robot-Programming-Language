@@ -1,11 +1,14 @@
 #TODO: text without a ; will be ignored or added to next command
+# trailing text at end of file allout
+# charector simply pass??
 #TODO: ensure all data varaibles are null after use
 #TODO: tokenization funciton can be optimised
-#TODO: error messages in terminal
-#TODO: limit turn and mov values
+#TODO: add more syntax error feeback
+
 
 # Preforms syntax checks and tokenizes batch files and commands
 import re
+from utils import Result
 
 # Patterns and matching tokens used for tokenization process
 patterns = [
@@ -15,6 +18,7 @@ patterns = [
     r'STOP',  # STOP command
 ]
 
+# Tokens must be CHARS
 token_map = {
     'MOV': 'F',
     'TURNL': 'L',
@@ -23,41 +27,35 @@ token_map = {
 }
 
 
-def clean(data_file):
-    if data_file:
-        # Remove trailing whitespaces, newlines, and null characters
-        data = data_file.strip().replace('\n', '').replace('\0', '')
+def _clean(data_file):
+    # Remove trailing whitespaces, newlines, and null characters
+    data = data_file.strip().replace('\n', '').replace('\0', '')
 
-        # Split lines by semicolon into a list
-        # TODO: This won't support large files
-        statements = data.split(';')
+    statements = data.split(';')
 
-        # Remove any leftover whitespace
-        clean_data = [statement.strip() for statement in statements]
+    # Remove any leftover whitespace
+    clean_data = [statement.strip() for statement in statements]
 
-        # Remove last blank statement resulting from split
-        clean_data.pop()
-        return clean_data
+    # Remove last blank statement resulting from split
+    clean_data.pop()
+    return clean_data
 
 
-def syntax_check(clean_data):
-    if clean_data:
-        checked_data = []
-        for command in clean_data:
-            matched = False
-            for pattern in patterns:
-                if re.match(pattern, command):
-                    checked_data.append(command)
-                    matched = True
-                    break
-            if not matched:
-                print("CODE 1: ", f"Syntax Error: {command}")
-                checked_data = None
+def _syntax_check(clean_data):
+    checked_data = []
+    for command in clean_data:
+        matched = False
+        for pattern in patterns:
+            if re.match(pattern, command):
+                checked_data.append(command)
+                matched = True
                 break
-        return checked_data
+        if not matched:
+            return Result(False, f"Syntax Error: Unrecognized command {command}")
+    return Result(checked_data, "Passed Syntax Check")
 
 
-def tokenize(checked_data):
+def _tokenize(checked_data):
     tokens = []
     for command in checked_data:
         matched = False
@@ -66,27 +64,16 @@ def tokenize(checked_data):
                 match = re.match(pattern + r'(\s+(\d+))?', command)
                 if match:
                     matched = True
-                    value = int(match.group(2)) if match.group(2) else None
+                    value = int(match.group(2)) if match.group(2) else 0
                     tokens.append((token, value))
                     break  # Exit the loop once a match is found
-        if not matched:
-            print("CODE 1: ", f"Syntax Error: {command}")
-            return None
-    return tokens
+    return Result(tokens, "Successfully Compiled")
 
 
 def run_parser(data_file):
-    tokens = None
-    terminal_message = "No Data"
-    if data_file:
-        clean_data = clean(data_file)  # Data file is cleaned removing whitespaces and unnecessary characters
-    if clean_data:
-        print(clean_data) # DEBUGGING
-        checked_data = syntax_check(clean_data)  # Cleaned data file is checked against the syntax
-    if checked_data:
-        print(checked_data) # DEBUGGING
-        tokens = tokenize(checked_data)
-    if tokens:
-        print(tokens) # DEBUGGING
-        terminal_message = "Passed"
-    return tokens, terminal_message
+    clean_data = _clean(data_file)  # Data file is cleaned removing whitespaces and unnecessary characters
+    result = _syntax_check(clean_data)  # Cleaned data file is checked against the syntax
+    if result.data:
+        result = _tokenize(result.data)
+        print("Tokens: ", result.data)  # DEBUGGING
+    return result

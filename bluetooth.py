@@ -3,6 +3,7 @@
 import time
 import serial
 import struct
+from utils import Result
 
 serial_port = None
 
@@ -24,12 +25,11 @@ def pack_tokens(tokens):
         # Pack token and value into bytes
         token_byte = bytes(token, 'utf-8')
         packed_tokens += struct.pack('cB', token_byte, value)
-
     return packed_tokens
 
 
 def send_tokens(packed_data): # Serial Port
-    print(packed_data)
+    print("Packed Tokens: ", packed_data)
     TEST_unpack_tokens(packed_data)
     # Send packed data over serial
     # serial_port.write(packed_data)
@@ -45,5 +45,5 @@ def TEST_unpack_tokens(packed_tokens):
         return_tokens.append((token, value))
         index += struct.calcsize('cB')
 
-    print(return_tokens)
+    print("TEST unpacked tokens: ", return_tokens)
 

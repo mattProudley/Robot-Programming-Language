@@ -1,4 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 
-type Error = Optional[str]
+@dataclass
+class Result:
+    data: Any
+    msg: Optional[str]
+   # def __post_init__(self):
+    #     if self.msg:
+    #         print(self.msg)
