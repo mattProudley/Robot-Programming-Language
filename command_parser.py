@@ -1,8 +1,6 @@
 #TODO: ensure all data varaibles are null after use
-#TODO: tokenization funciton can be optimised
-#TODO: add more syntax error feeback
 #TODO: commands without variables need a specific error message
-
+#TODO: tokenization funciton can be optimised
 
 # Preforms syntax checks and tokenizes batch files and commands
 import re
@@ -37,11 +35,13 @@ def _clean(data_file):
     last_semicolon_index = data.rfind(';')
 
     if last_semicolon_index == -1:
-        return Result(False, "Syntax Error: No appropriate commands provided for syntax check.")
+        return Result(False, "\nSyntax Error: No appropriate commands provided for syntax check.\n"
+                             "Note: Single commands must still include a ';' e.g. 'MOV 10;'")
 
     # Check if the last statement is complete
     if last_semicolon_index != len(data) - 1:
-        return Result(False, "Syntax Error: File ends unexpectedly.")
+        return Result(False, "\nSyntax Error: File ends unexpectedly.\n"
+                             "Note: All commands must end with a ';' e.g. 'MOV 90;'")
 
     # Split statements by semicolon
     statements = data.split(';')
@@ -63,7 +63,7 @@ def _pattern_match(commands):
                 matched = True
                 break
         if not matched:
-            return Result(False, f"Syntax Error: Unrecognized command '{command}'")
+            return Result(False, f"\nSyntax Error: Unrecognized command '{command}'")
     print("Matched Data: ", matched_data)
     return Result(matched_data, "Pattern Matched")
 

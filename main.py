@@ -1,3 +1,5 @@
+#TODO: add colours to terminal
+
 # GUI constructor and Event Handler
 import tkinter as tk
 from tkinter import Menu, Text, Scrollbar
