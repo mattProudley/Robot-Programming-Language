@@ -2,6 +2,7 @@
 #TODO: ensure all data varaibles are null after use
 #TODO: tokenization funciton can be optimised
 #TODO: error messages in terminal
+#TODO: limit turn and mov values
 
 # Preforms syntax checks and tokenizes batch files and commands
 import re
@@ -15,11 +16,10 @@ patterns = [
 ]
 
 token_map = {
-    'MOV': 'M',
-    'TURNL': 'TL',
-    'TURNR': 'TR',
+    'MOV': 'F',
+    'TURNL': 'L',
+    'TURNR': 'R',
     'STOP': 'S',
-
 }
 
 
@@ -76,6 +76,8 @@ def tokenize(checked_data):
 
 
 def run_parser(data_file):
+    tokens = None
+    terminal_message = "No Data"
     if data_file:
         clean_data = clean(data_file)  # Data file is cleaned removing whitespaces and unnecessary characters
     if clean_data:
@@ -87,5 +89,4 @@ def run_parser(data_file):
     if tokens:
         print(tokens) # DEBUGGING
         terminal_message = "Passed"
-    return terminal_message
-
+    return tokens, terminal_message

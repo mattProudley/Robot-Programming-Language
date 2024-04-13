@@ -3,7 +3,8 @@ import tkinter as tk
 from tkinter import Menu, Text, Scrollbar
 from file_handling import save_file, open_file  # Import file_handling functions for file operations
 import command_parser
-
+import bluetooth
+from utils import Error
 
 class GUI:
     def __init__(self):
@@ -44,7 +45,7 @@ class GUI:
         terminal_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
         # Create a text widget for terminal output
-        self.terminal = Text(terminal_frame, bg="black", fg="white", height=5)  # TODO: Colour text depending on error
+        self.terminal = Text(terminal_frame, bg="black", fg="white", height=5)
         self.terminal.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Create a scrollbar for the terminal
@@ -62,25 +63,32 @@ class GUI:
             self.clear_text_area()  # Clear existing text in text area
             self.text_area.insert("1.0", data)  # Insert file contents in text area
 
-    # Handles all GUI events for saving a file
+    # Handles events for saving a file
     def save_file_event(self):
         # Save file and display result in terminal
         data = self.text_area.get("1.0", "end-1c")  # Get text from text area
-        terminal_message = save_file(data)  # Call function to save file and pass text...
+        terminal_message: Error = save_file(data)  # Call function to save file and pass text...
         # ... function returns a message communicating success or error
-        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
-
+        if terminal_message:
+            self.terminal_print(terminal_message)
 
     def run_file_event(self):
-        data = self.text_area.get("1.0", "end-1c")  # Get text from text area
-        terminal_message = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
+        data = self.get_data()
+        tokens, terminal_message = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
         self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
-        # Send Commands
+        if tokens:
+            bluetooth.send(tokens)
 
     # Clears text area (seperated for readability)
     def clear_text_area(self):
         # Clear text area
         self.text_area.delete("1.0", "end")
+
+    def get_data(self):
+        return self.text_area.get("1.0", "end-1c")
+
+    def terminal_print(self, terminal_message):
+        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
 
     # Runs GUI event listener
     def run(self):

@@ -1,9 +1,9 @@
 # Functions related to file management
 from tkinter import filedialog
-
+from utils import Error
 
 # Function handles saving files
-def save_file(data):
+def save_file(data) -> Error:
     """Function to save data as a text file."""
     # Prompt the user to select a file path for saving
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
@@ -12,10 +12,10 @@ def save_file(data):
         # Write the text to the selected file and return message
         with open(file_path, "w") as f:  # File is closed after the with statement
             f.write(data)
-        return "File saved"
+        return Error("File saved")
     # Else return error
     else:
-        return "File not saved"
+        return Error("File not saved")
 
 # Function handles opening files
 def open_file():
