@@ -1,7 +1,3 @@
-#TODO: commands without variables need a specific error message
-#TODO: tokenization funciton can be optimised
-# #TODO: loop or if does not end
-
 # Preforms syntax checks and tokenizes batch files and commands
 import re
 from utils import Result
@@ -11,7 +7,7 @@ patterns = [
     r'MOV\s+(\d+)',  # MOV command
     r'TURNL\s+(\d+)',  # TURN LEFT command
     r'TURNR\s+(\d+)',  # TURN RIGHT command
-    r'STOP',  # STOP command (include per seconds)
+    r'STOP\s+(\d+)',  # STOP command (include per seconds)
     r'FOR\s+(\d+)',
     r'END',
     r'READ'
@@ -90,9 +86,6 @@ def _pattern_match(commands):
     return Result(matched_data, "Pattern Matched")
 
 
-# def _check_loop_closed(pattern_matched_data):
-
-
 def _tokenize(pattern_matched_data):
     tokens = []  # Initialize an empty list to store tokens
 
@@ -127,11 +120,7 @@ def run_parser(data_file):
 
         # Check if the pattern matching was successful
         if result.data:
-            result = _check_loop_closed(result.data)  # Check if loops are properly closed
-
-            # Check if the loop closure check was successful
-            if result.data:
-                result = _tokenize(result.data)  # Tokenize the pattern-matched data
+            result = _tokenize(result.data)  # Tokenize the pattern-matched data
 
     return result  # Return the final result containing the tokens or an error message
 

@@ -1,7 +1,15 @@
 add cursor
-add comments
+
+highlight syntax error code
+
 automatic terminal print
 colour terminal output
 terminal auto scroll
+
 add infinite loop?
+for loop
 add checks for loop
+
+add limits to values
+values cannot be 0
+error message no value attached

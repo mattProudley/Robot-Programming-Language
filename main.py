@@ -1,5 +1,3 @@
-#TODO: add colours to terminal
-
 # GUI constructor and Event Handler
 import tkinter as tk
 from tkinter import Menu, Text, Scrollbar
@@ -34,8 +32,8 @@ class GUI:
         # Create a "File" dropdown menu inside menu bar
         file_menu = Menu(menu_bar, tearoff=False)
         menu_bar.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="Open", command=self.open_file_event)  # Add command to open file
-        file_menu.add_command(label="Save", command=self.save_file_event)  # Add command to save file
+        file_menu.add_command(label="Open", command=self.open_file_event)
+        file_menu.add_command(label="Save", command=self.save_file_event)
         file_menu.add_separator()  # Separates options in the drop-down with a line
         file_menu.add_command(label="Compile / Run", command=self.run_file_event)
 
@@ -72,7 +70,7 @@ class GUI:
     def open_command_driven_terminal(self):
         command_window = tk.Toplevel(self.root)
         command_window.title("Command-Driven Terminal")
-        command_window.geometry("400x100")  # Set the width to 400 pixels and height to 200 pixels
+        command_window.geometry("400x100")
 
         # Create a frame for the command entry
         command_frame = tk.Frame(command_window, padx=10, pady=10)
@@ -130,7 +128,7 @@ class GUI:
         if result.data:
             self.bluetooth_send_event(result.data)
 
-    # Clears text area (seperated for readability)
+    # Clears text area
     def clear_text_area(self):
         # Clear text area
         self.text_area.delete("1.0", "end")
