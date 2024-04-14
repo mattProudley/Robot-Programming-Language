@@ -1,5 +1,3 @@
-add cursor
-
 highlight syntax error code
 
 automatic terminal print

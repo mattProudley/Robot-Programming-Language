@@ -22,7 +22,7 @@ class GUI:
         self.root.geometry("800x600")  # Set the width to 800 pixels and height to 600 pixels
 
         # Create a text area widget for input
-        self.text_area = Text(self.root, bg="black", fg="white")
+        self.text_area = Text(self.root, bg="black", fg="white", insertbackground="white") # insert bg white inv cursor
         self.text_area.pack(fill=tk.BOTH, expand=True)
 
         # Create a menu bar
