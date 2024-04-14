@@ -37,12 +37,18 @@ class GUI:
         file_menu.add_command(label="Open", command=self.open_file_event)  # Add command to open file
         file_menu.add_command(label="Save", command=self.save_file_event)  # Add command to save file
         file_menu.add_separator()  # Separates options in the drop-down with a line
-        file_menu.add_command(label="Run", command=self.run_file_event)
+        file_menu.add_command(label="Compile / Run", command=self.run_file_event)
 
         # Create an "Edit" dropdown menu inside menu bar
         edit_menu = Menu(menu_bar, tearoff=False)
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
         edit_menu.add_command(label="Clear Text Area", command=self.clear_text_area)  # Add command to clear text area
+
+        # Create an "Edit" dropdown menu inside menu bar
+        tools_menu = Menu(menu_bar, tearoff=False)
+        menu_bar.add_cascade(label="Tools", menu=tools_menu)
+        tools_menu.add_command(label="Sensor Readings", command=self.open_sensor_readings_window)
+        tools_menu.add_command(label="Command-Driven Terminal", command=self.open_command_driven_terminal)
 
         # Create a frame for the terminal output
         terminal_frame = tk.Frame(self.root)
@@ -57,15 +63,56 @@ class GUI:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.terminal.config(yscrollcommand=scrollbar.set)
 
+    # Function to open a new window called "Sensor Readings"
+    def open_sensor_readings_window(self):
+        sensor_window = tk.Toplevel(self.root)
+        sensor_window.title("Sensor Readings")
+        # Add contents to the window
+
+    def open_command_driven_terminal(self):
+        command_window = tk.Toplevel(self.root)
+        command_window.title("Command-Driven Terminal")
+        command_window.geometry("400x100")  # Set the width to 400 pixels and height to 200 pixels
+
+        # Create a frame for the command entry
+        command_frame = tk.Frame(command_window, padx=10, pady=10)
+        command_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Add a label to the command-driven terminal
+        label = tk.Label(command_frame, text="Enter commands:")
+        label.pack(side=tk.TOP, pady=5)
+
+        # Create a text entry widget for entering the command
+        command_entry = tk.Entry(command_frame, bg="white", fg="black")
+        command_entry.pack(fill=tk.BOTH, expand=True)
+
+        def send_command_event():
+            command = command_entry.get()
+            self.terminal_print(f"Command to be sent: {command}")
+            result = command_parser.run_parser(command)
+            if result.msg:
+                self.terminal_print(result.msg)
+            if result.data:
+                self.bluetooth_send_event(result.data)
+            # Clear the text entry
+            command_entry.delete(0, tk.END)
+
+        # Create a button to send the command
+        send_button = tk.Button(command_frame, text="Send Command", command=send_command_event)
+        send_button.pack(side=tk.BOTTOM, pady=5)
+
+        # Bind the Enter key to send the command
+        command_entry.bind("<Return>", lambda event: send_command_event())
+
     # Handles all GUI events for opening a file
     def open_file_event(self):
         # Open file and display result in terminal
         result = open_file()  # Call function to open file...
         # ...function returns data and a message communicating success or error
-        if result.data:
-            self.set_text_area(result.data)
         if result.msg:
             self.terminal_print(result.msg)
+        if result.data:
+            self.set_text_area(result.data)
 
     # Handles events for saving a file
     def save_file_event(self):
@@ -78,10 +125,10 @@ class GUI:
     def run_file_event(self):
         data = self.get_text_area()
         result = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
-        if result.data:
-            bluetooth.send(result.data)
         if result.msg:
             self.terminal_print(result.msg)
+        if result.data:
+            self.bluetooth_send_event(result.data)
 
     # Clears text area (seperated for readability)
     def clear_text_area(self):
@@ -96,7 +143,11 @@ class GUI:
         self.text_area.insert("1.0", data)  # Insert file contents in text area
 
     def terminal_print(self, terminal_message):
-        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
+        self.terminal.insert(tk.END, f"\n{terminal_message}\n")  # Display message in terminal
+
+    def bluetooth_send_event(self, data):
+        result = bluetooth.send(data)
+        self.terminal_print(result.msg)
 
     # Runs GUI event listener
     def run(self):

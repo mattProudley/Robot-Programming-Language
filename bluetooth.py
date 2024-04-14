@@ -9,11 +9,12 @@ serial_port = None
 
 
 def send(tokens):
-    packed_data = pack_tokens(tokens)
-    send_tokens(packed_data) #Serial Port
+    packed_data = _pack_tokens(tokens)
+    result = _transmit_tokens(packed_data) #Serial Port
+    return result
 
 
-def pack_tokens(tokens):
+def _pack_tokens(tokens):
     packed_tokens = b''  # Initialize an empty byte stream
 
     # Iterate over tokens and pack each token into the byte stream
@@ -28,14 +29,15 @@ def pack_tokens(tokens):
     return packed_tokens
 
 
-def send_tokens(packed_data): # Serial Port
+def _transmit_tokens(packed_data): # Serial Port
     print("Packed Tokens: ", packed_data)
-    TEST_unpack_tokens(packed_data)
+    _TEST_unpack_tokens(packed_data)
+    return Result(packed_data, "Successfully Sent")
     # Send packed data over serial
     # serial_port.write(packed_data)
 
 
-def TEST_unpack_tokens(packed_tokens):
+def _TEST_unpack_tokens(packed_tokens):
     return_tokens = []
     index = 0
 

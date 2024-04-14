@@ -1,0 +1,7 @@
+add cursor
+add comments
+automatic terminal print
+colour terminal output
+terminal auto scroll
+add infinite loop?
+add checks for loop
