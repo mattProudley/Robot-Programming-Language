@@ -4,5 +4,7 @@ from typing import Optional, Any
 class Result:
     data: Any
     msg: Optional[str]
-    # def __post_init__(self):
-    #     if self.msg:
+
+    def __post_init__(self):
+        if self.msg:
+            print(self.msg)

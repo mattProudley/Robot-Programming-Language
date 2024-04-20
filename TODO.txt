@@ -9,6 +9,7 @@ for loop
 
 limit mov and stop using a variable
 
+errors:
 contains decimal value
 contains no value
 unrecognised command
