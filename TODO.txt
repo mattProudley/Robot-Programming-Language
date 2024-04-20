@@ -7,7 +7,6 @@ terminal auto scroll
 add infinite loop?
 for loop
 
-limit mov and stop using a variable
 
 errors:
 contains decimal value
@@ -15,3 +14,4 @@ contains no value
 unrecognised command
 value cannot be
 value can be no greater than 360
+limit mov and stop using a variable
