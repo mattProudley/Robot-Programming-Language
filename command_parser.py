@@ -4,13 +4,14 @@ from utils import Result
 
 # Patterns and matching tokens used for tokenization process
 patterns = [
-    r'MOV\s+(\d+)',  # MOV command
-    r'TURNL\s+(\d+)',  # TURN LEFT command
-    r'TURNR\s+(\d+)',  # TURN RIGHT command
-    r'STOP\s+(\d+)',  # STOP command (include per seconds)
-    r'FOR\s+(\d+)',
+    r'MOV\s+([-+]?[1-9]\d*)',  # MOV command (+ forward, - reverse, cannot be 0)
+    r'TURNL\s+([1-9][0-9]{0,2}|360)',  # TURN LEFT command (degrees, limited between 1 and 360)
+    r'TURNR\s+([1-9][0-9]{0,2}|360)',  # TURN RIGHT command (degrees, limited between 1 and 360)
+    r'STOP\s+([1-9]\d*)',  # STOP command (per seconds, cannot be 0)
+    r'FOR\s+([1-9]\d+)',  # FOR loop command (iterative count, cannot be 0)
+    # r'IF',
     r'END',
-    r'READ'
+    # r'READ'
 ]
 
 # Tokens must be CHARS
@@ -20,8 +21,9 @@ token_map = {
     'TURNR': 'R',
     'STOP': 'S',
     'FOR': 'f',
+    # 'IF': 'i',
     'END': 'e',
-    'READ': 'r'
+    # 'READ': 'r'
 }
 
 
@@ -86,11 +88,11 @@ def _pattern_match(commands):
     return Result(matched_data, "Pattern Matched")
 
 
-def _tokenize(pattern_matched_data):
+def _tokenize(_pattern_matched_data):
     tokens = []  # Initialize an empty list to store tokens
 
     # Iterate through each command in the pattern-matched data
-    for command in pattern_matched_data:
+    for command in _pattern_matched_data:
         # Iterate through each pattern and its corresponding token in the token_map dictionary
         for pattern, token in token_map.items():
             # Check if the current command starts with the current pattern
@@ -123,4 +125,17 @@ def run_parser(data_file):
             result = _tokenize(result.data)  # Tokenize the pattern-matched data
 
     return result  # Return the final result containing the tokens or an error message
+
+    #def _check_block(_tokenized_data):
+        # for length of token array
+        #     if array i == f #for
+        #         i = i+ 1
+        #         for i in array
+        #             if array i == end
+        #                 break
+        #             if array i == for
+        #                 return error(no end statment)
+        #     if array i = end
+        #         retrun error (end before refrence)
+        # return success
 

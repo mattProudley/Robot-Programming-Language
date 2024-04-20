@@ -6,8 +6,11 @@ terminal auto scroll
 
 add infinite loop?
 for loop
-add checks for loop
 
-add limits to values
-values cannot be 0
-error message no value attached
+limit mov and stop using a variable
+
+contains decimal value
+contains no value
+unrecognised command
+value cannot be
+value can be no greater than 360

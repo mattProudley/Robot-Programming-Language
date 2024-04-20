@@ -1,7 +1,7 @@
 #TODO: checksum
 
 import time
-import serial
+#import serial
 import struct
 from utils import Result
 
