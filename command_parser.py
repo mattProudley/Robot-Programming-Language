@@ -53,7 +53,6 @@ def _split_commands(data_file):
     # Remove any leftover whitespace created from split
     clean_data = [statement.strip() for statement in statements if statement.strip()]
 
-    print("Cleaned Data: ", clean_data)
     return Result(clean_data, "Data Cleaned")
 
 
@@ -81,9 +80,6 @@ def _pattern_match(commands):
         if not matched:
             return Result(False, f"Syntax Error: Unrecognized command '{command}'")
 
-    # Print the matched commands for debugging purposes
-    print("Matched Data: ", matched_data)
-
     # Return a Result object indicating success and the list of matched commands
     return Result(matched_data, "Pattern Matched")
 
@@ -106,11 +102,8 @@ def _tokenize(_pattern_matched_data):
                     tokens.append((token, value))
                     break  # Exit the inner loop once a match is found
 
-        # Debugging: Print the generated tokens
-    print("Tokens: ", tokens)
-
     # Return a Result object containing the generated tokens and a success message
-    return Result(tokens, "Successfully Compiled")
+    return Result(tokens, "Tokenized")
 
 
 def run_parser(data_file):

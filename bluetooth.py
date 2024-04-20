@@ -8,13 +8,7 @@ from utils import Result
 serial_port = None
 
 
-def send(tokens):
-    packed_data = _pack_tokens(tokens)
-    result = _transmit_tokens(packed_data) #Serial Port
-    return result
-
-
-def _pack_tokens(tokens):
+def _pack_data(tokens):
     packed_tokens = b''  # Initialize an empty byte stream
 
     # Iterate over tokens and pack each token into the byte stream
@@ -26,15 +20,20 @@ def _pack_tokens(tokens):
         # Pack token and value into bytes
         token_byte = bytes(token, 'utf-8')
         packed_tokens += struct.pack('cB', token_byte, value)
-    return packed_tokens
+    return Result(packed_tokens, "Packed Data")
 
 
 def _transmit_tokens(packed_data): # Serial Port
-    print("Packed Tokens: ", packed_data)
-    _TEST_unpack_tokens(packed_data)
-    return Result(packed_data, "Successfully Sent")
     # Send packed data over serial
     # serial_port.write(packed_data)
+    return Result(packed_data, "Successfully Compiled and Sent")
+
+def send(tokens):
+    if tokens:
+        result = _pack_data(tokens)
+        result = _transmit_tokens(result.data)  # Serial Port
+        _TEST_unpack_tokens(Result.data)
+        return result
 
 
 def _TEST_unpack_tokens(packed_tokens):
