@@ -23,20 +23,22 @@ def _pack_data(tokens):
     return Result(packed_tokens, "Packed Data")
 
 
-def _transmit_tokens(packed_data): # Serial Port
+def _transmit_packed_data(packed_data): # Serial Port
     # Send packed data over serial
     # serial_port.write(packed_data)
     return Result(packed_data, "Successfully Compiled and Sent")
 
-def send(tokens):
-    if tokens:
-        result = _pack_data(tokens)
-        result = _transmit_tokens(result.data)  # Serial Port
-        _TEST_unpack_tokens(Result.data)
+def send(data):
+    if data:
+        result = _pack_data(data)
+        result = _transmit_packed_data(result.data)  # Serial Port
+        _TEST_unpack_data(result.data)
         return result
+    else:
+        return Result(False, "No data passed to send function")
 
 
-def _TEST_unpack_tokens(packed_tokens):
+def _TEST_unpack_data(packed_tokens):
     return_tokens = []
     index = 0
 

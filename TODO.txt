@@ -4,10 +4,6 @@ automatic terminal print
 colour terminal output
 terminal auto scroll
 
-add infinite loop?
-for loop
-
-
 errors:
 contains decimal value
 contains no value
