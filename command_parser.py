@@ -39,9 +39,7 @@ def _compile_patterns():
         r'TURNR\s+([1-9][0-9]{0,2}|360)',  # TURN RIGHT command (degrees, limited between 1 and 360)
         r'STOP\s+([1-9]\d*)',  # STOP command (per seconds, cannot be 0)
         r'FOR\s+([1-9]\d+)',  # FOR loop command (iterative count, cannot be 0)
-        # r'IF',
         r'END'
-        # r'READ'
     ]
     _compiled_patterns = [re.compile(pattern) for pattern in patterns]
     return _compiled_patterns
@@ -75,21 +73,12 @@ def _pattern_match(_compiled_patterns, commands):
     return Result(matched_data, "Pattern Matched")
 
 
-def validate_turnl(value_str):
+def validate_turn(value_str):
     if not value_str:
-        return "Error: TURNL command is missing a value."
+        return "Error: TURN command is missing a value."
     value = int(value_str)
     if not (1 <= value <= 360):
-        return f"Error: TURNL value {value} out of range (1-360)."
-    return None
-
-
-def validate_turnr(value_str):
-    if not value_str:
-        return "Error: TURNL command is missing a value."
-    value = int(value_str)
-    if not (1 <= value <= 360):
-        return f"Error: TURNL value {value} out of range (1-360)."
+        return f"Error: TURN value {value} out of range (1-360)."
     return None
 
 
@@ -98,13 +87,13 @@ def validate_mov(value_str):
         return "Error: mov command is missing a value."
     value = int(value_str)
     if value == 0:
-        return f"Error: mov value {value} cannot be zero."
+        return f"Error: mov value cannot be zero."
     return None
 
 
 def validate_stop(value_str):
     if not value_str:
-        return "Error: stop command is missing a value."
+        return "Error: stop command is missing a seconds value."
     value = int(value_str)
     if value <= 0:
         return f"Error: stop value {value} must be greater than zero."
@@ -119,9 +108,7 @@ def _tokenize(_pattern_matched_data):
         'TURNR': 'R',
         'STOP': 'S',
         'FOR': 'f',
-        # 'IF': 'i',
         'END': 'e'
-        # 'READ': 'r'
     }
 
     tokens = []  # Initialize an empty list to store tokens
