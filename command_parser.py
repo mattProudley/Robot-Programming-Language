@@ -2,54 +2,6 @@
 import re
 from utils import Result
 
-# Patterns and matching tokens used for tokenization process
-patterns = [
-    r'MOV\s+([-+]?[1-9]\d*)',  # MOV command (+ forward, - reverse, cannot be 0)
-    r'TURNL\s+([1-9][0-9]{0,2}|360)',  # TURN LEFT command (degrees, limited between 1 and 360)
-    r'TURNR\s+([1-9][0-9]{0,2}|360)',  # TURN RIGHT command (degrees, limited between 1 and 360)
-    r'STOP\s+([1-9]\d*)',  # STOP command (per seconds, cannot be 0)
-    r'FOR\s+([1-9]\d+)',  # FOR loop command (iterative count, cannot be 0)
-    # r'IF',
-    r'END'
-    # r'READ'
-]
-
-# Tokens must be CHARS
-token_map = {
-    'MOV': 'F',
-    'TURNL': 'L',
-    'TURNR': 'R',
-    'STOP': 'S',
-    'FOR': 'f',
-    # 'IF': 'i',
-    'END': 'e'
-    # 'READ': 'r'
-}
-
-# def _compile_patterns():
-#     patterns = [
-#         r'MOV\s+([-+]?[1-9]\d*)',  # MOV command (+ forward, - reverse, cannot be 0)
-#         r'TURNL\s+([1-9][0-9]{0,2}|360)',  # TURN LEFT command (degrees, limited between 1 and 360)
-#         r'TURNR\s+([1-9][0-9]{0,2}|360)',  # TURN RIGHT command (degrees, limited between 1 and 360)
-#         r'STOP\s+([1-9]\d*)',  # STOP command (per seconds, cannot be 0)
-#         r'FOR\s+([1-9]\d+)',  # FOR loop command (iterative count, cannot be 0)
-#         # r'IF',
-#         r'END'
-#         # r'READ'
-#     ]
-#
-#     compiled_patterns = [re.compile(pattern) for pattern in patterns]
-#
-#     return compiled_patterns
-
-# def _validate_turnl(value_str)
-#         if not value_str
-#             return "Error: {command} is missing a value)"
-#         value = int(value_str)
-#         if not (1 <= value <= 360):
-#             return f"Error: Value is out of range or is a decimal number, (1-360) degrees"
-#         return None
-
 
 def _split_commands(data_file):
     # If no data file
@@ -80,7 +32,22 @@ def _split_commands(data_file):
     return Result(clean_data, "Data Cleaned")
 
 
-def _pattern_match(patterns, commands):
+def _compile_patterns():
+    patterns = [
+        r'MOV\s+([-+]?[1-9]\d*)',  # MOV command (+ forward, - reverse, cannot be 0)
+        r'TURNL\s+([1-9][0-9]{0,2}|360)',  # TURN LEFT command (degrees, limited between 1 and 360)
+        r'TURNR\s+([1-9][0-9]{0,2}|360)',  # TURN RIGHT command (degrees, limited between 1 and 360)
+        r'STOP\s+([1-9]\d*)',  # STOP command (per seconds, cannot be 0)
+        r'FOR\s+([1-9]\d+)',  # FOR loop command (iterative count, cannot be 0)
+        # r'IF',
+        r'END'
+        # r'READ'
+    ]
+    _compiled_patterns = [re.compile(pattern) for pattern in patterns]
+    return _compiled_patterns
+
+
+def _pattern_match(_compiled_patterns, commands):
     # Initialize an empty list to store matched commands
     matched_data = []
 
@@ -90,7 +57,7 @@ def _pattern_match(patterns, commands):
         matched = False
 
         # Iterate through each pattern in the predefined patterns list
-        for pattern in patterns:
+        for pattern in _compiled_patterns:
             # Use regular expression to check if the command matches the current pattern
             if re.match(pattern, command):
                 # If a match is found, append the command to the matched_data list
@@ -108,7 +75,55 @@ def _pattern_match(patterns, commands):
     return Result(matched_data, "Pattern Matched")
 
 
+def validate_turnl(value_str):
+    if not value_str:
+        return "Error: TURNL command is missing a value."
+    value = int(value_str)
+    if not (1 <= value <= 360):
+        return f"Error: TURNL value {value} out of range (1-360)."
+    return None
+
+
+def validate_turnr(value_str):
+    if not value_str:
+        return "Error: TURNL command is missing a value."
+    value = int(value_str)
+    if not (1 <= value <= 360):
+        return f"Error: TURNL value {value} out of range (1-360)."
+    return None
+
+
+def validate_mov(value_str):
+    if not value_str:
+        return "Error: mov command is missing a value."
+    value = int(value_str)
+    if value == 0:
+        return f"Error: mov value {value} cannot be zero."
+    return None
+
+
+def validate_stop(value_str):
+    if not value_str:
+        return "Error: stop command is missing a value."
+    value = int(value_str)
+    if value <= 0:
+        return f"Error: stop value {value} must be greater than zero."
+    return None
+
+
 def _tokenize(_pattern_matched_data):
+    # Tokens must be CHARS
+    token_map = {
+        'MOV': 'F',
+        'TURNL': 'L',
+        'TURNR': 'R',
+        'STOP': 'S',
+        'FOR': 'f',
+        # 'IF': 'i',
+        'END': 'e'
+        # 'READ': 'r'
+    }
+
     tokens = []  # Initialize an empty list to store tokens
 
     # Iterate through each command in the pattern-matched data
@@ -130,13 +145,38 @@ def _tokenize(_pattern_matched_data):
     return Result(tokens, "Tokenized")
 
 
+def _check_blocks(_tokenized_data):
+    block_stack = []
+
+    for i, (token, _) in enumerate(_tokenized_data):
+        if token == 'f':
+            # Add 'for' to the stack to track the block
+            block_stack.append(token)
+        elif token == 'e':
+            if block_stack:
+                # If we encounter an 'end', check the stack
+                stack_top = block_stack.pop()
+                if stack_top != 'f':
+                    return Result(False,  "Error: Unexpected 'end'")
+            else:
+                # If the stack is empty, this 'end' is unmatched
+                return Result(False, "Error: 'end' before reference")
+
+    if block_stack:
+        # If the stack is not empty, there are unmatched statements
+        return Result(False, "Error: No 'end' statement for 'for' at index")
+
+    # If the loop completes without errors, the blocks are balanced
+    return Result(_tokenized_data, "Blocks Checked")
+
+
 def run_parser(data_file):
     if data_file:
         result = _split_commands(data_file)  # Clean the data file by removing whitespaces and unnecessary characters
 
         # Check if the data cleaning was successful
         if result.data:
-            # patterns = _compile_patterns()
+            patterns = _compile_patterns()
             result = _pattern_match(patterns, result.data)  # Match the cleaned data file against predefined patterns
 
             # Check if the pattern matching was successful
@@ -152,27 +192,3 @@ def run_parser(data_file):
     return Result(False, "Error: No data file given to parse.")
 
 
-def _check_blocks(tokenized_data):
-    block_stack = []
-
-    for i, (token, _) in enumerate(tokenized_data):
-        if token == 'f':
-            # Add 'for' to the stack to track the block
-            block_stack.append(token)
-            print("f found")
-        elif token == 'e':
-            if block_stack:
-                # If we encounter an 'end', check the stack
-                stack_top = block_stack.pop()
-                if stack_top != 'f':
-                    return Result(False,  f"Error: Unexpected 'end' at index {i}")
-            else:
-                # If the stack is empty, this 'end' is unmatched
-                return Result(False, f"Error: 'end' before reference at index {i}")
-
-    if block_stack:
-        # If the stack is not empty, there are unmatched statements
-        return Result(False, f"Error: No 'end' statement for 'for' at index {len(tokenized_data) - 1}")
-
-    # If the loop completes without errors, the blocks are balanced
-    return Result(tokenized_data, "Blocks Checked")
