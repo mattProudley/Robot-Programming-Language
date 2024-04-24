@@ -75,7 +75,7 @@ def _pattern_match(_compiled_patterns, commands):
 
 def validate_turn(value_str):
     if not value_str:
-        return "Error: TURN command is missing a value."
+        return "Error: TURN command is missing a degrees value."
     value = int(value_str)
     if not (1 <= value <= 360):
         return f"Error: TURN value {value} out of range (1-360)."
@@ -84,7 +84,7 @@ def validate_turn(value_str):
 
 def validate_mov(value_str):
     if not value_str:
-        return "Error: mov command is missing a value."
+        return "Error: mov command is missing a steps value."
     value = int(value_str)
     if value == 0:
         return f"Error: mov value cannot be zero."

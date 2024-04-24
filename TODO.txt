@@ -4,6 +4,9 @@ automatic terminal print
 colour terminal output
 terminal auto scroll
 
+checksum
+
+
 errors:
 contains decimal value
 contains no value

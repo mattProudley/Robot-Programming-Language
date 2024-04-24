@@ -5,6 +5,7 @@ from file_handling import save_file, open_file  # Import file_handling functions
 import command_parser
 import bluetooth
 
+
 class GUI:
     def __init__(self):
         # Initialize the main Tkinter window
