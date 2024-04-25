@@ -1,3 +1,4 @@
+# Tests and demonstrates core functionality of the program without GUI
 import command_parser
 import bluetooth
 from file_handling import open_file
