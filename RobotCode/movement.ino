@@ -1,10 +1,4 @@
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-
-}
+#include <Arduino.h>
 
 // Placeholder functions for execution
 void move(int steps) {
@@ -22,3 +16,4 @@ void turnRight(int degrees) {
 void stop() {
     // Implement stop functionality
 }
+

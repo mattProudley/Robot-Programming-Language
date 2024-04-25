@@ -1,10 +1,25 @@
-highlight syntax error code
+interpreter:
+give useful errors
+communicate data over serial
+checksum
+interpret data to commands
 
+bluetooth functions:
+check for connection
+interpret commands over bt
+
+robot functionality:
+preform movements
+sensor readings
+
+other useful things:
 automatic terminal print
 colour terminal output
 terminal auto scroll
+highlight syntax error code
+stop function
+in app change com port
 
-checksum
 
 
 errors:
@@ -14,3 +29,4 @@ unrecognised command
 value cannot be
 value can be no greater than 360
 limit mov and stop using a variable
+

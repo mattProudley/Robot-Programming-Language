@@ -12,7 +12,19 @@ class GUI:
         self.root = tk.Tk()
         self.text_area = None  # Initialize text area attribute to None initially.
         self.terminal = None  # Initialize terminal attribute to None initially.
+        self.setup_bluetooth() # Sets up serial port
         self.gui_constructor()  # Call method to construct GUI components
+
+    def setup_bluetooth(self):
+        bluetooth.setup_serial_port()
+
+    def bluetooth_send_event(self, data):
+        result = bluetooth.send(data)
+        self.terminal_print(result.msg)
+
+    def check_serial_event(self):
+        bluetooth.check_serial_data()
+        self.root.after(100, self.check_serial_event)
 
     # Constructs the GUI window
     def gui_constructor(self):
@@ -41,7 +53,7 @@ class GUI:
         # Create an "Edit" dropdown menu inside menu bar
         edit_menu = Menu(menu_bar, tearoff=False)
         menu_bar.add_cascade(label="Edit", menu=edit_menu)
-        edit_menu.add_command(label="Clear Text Area", command=self.clear_text_area)  # Add command to clear text area
+        edit_menu.add_command(label="Clear Text Area", command=self.clear_text_area)
 
         # Create an "Edit" dropdown menu inside menu bar
         tools_menu = Menu(menu_bar, tearoff=False)
@@ -144,13 +156,10 @@ class GUI:
     def terminal_print(self, terminal_message):
         self.terminal.insert(tk.END, f"\n{terminal_message}\n")  # Display message in terminal
 
-    def bluetooth_send_event(self, data):
-        result = bluetooth.send(data)
-        self.terminal_print(result.msg)
-
     # Runs GUI event listener
     def run(self):
         # Run the main GUI loop
+        self.check_serial_event()
         self.root.mainloop()
 
 

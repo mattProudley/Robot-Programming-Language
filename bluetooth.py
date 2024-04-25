@@ -1,13 +1,21 @@
-#TODO: checksum
-
-import time
-#import serial
+import serial
 import struct
 from utils import Result
 
 serial_port = None
 
+def setup_serial_port():
+    global serial_port
+    # Set up serial communication with the specified port and baud rate
+    try:
+        serial_port = serial.Serial('COM4', 9600, timeout=1) # CHECK COM PORT BEFORE RUNNING
+        print(serial_port)
+    except serial.SerialException as e:
+        print(f"Failed to open serial port: {e}, CHANGE PORT")
+        serial_port = None  # Set to None if there is an error
 
+
+# Functions for sending data
 def _pack_data(tokens):
     packed_tokens = b''  # Initialize an empty byte stream
 
@@ -23,19 +31,43 @@ def _pack_data(tokens):
     return Result(packed_tokens, "Packed Data")
 
 
-def _transmit_packed_data(packed_data): # Serial Port
+def _send_packed_data(packed_data): # Serial Port
     # Send packed data over serial
-    # serial_port.write(packed_data)
+    serial_port.write(packed_data)
     return Result(packed_data, "Successfully Compiled and Sent")
 
 def send(data):
     if data:
         result = _pack_data(data)
-        result = _transmit_packed_data(result.data)  # Serial Port
+        result = _send_packed_data(result.data)  # Serial Port
         _TEST_unpack_data(result.data)
         return result
     else:
         return Result(False, "No data passed to send function")
+
+
+# Functions for receiving data
+def bluetooth_receive():
+    # Check if there is data available on the serial port
+    if serial_port.in_waiting > 0:
+        try:
+            # Read data from the serial port
+            data = serial_port.readLine().strip()
+            # Decode data from ASCII values to characters
+            decoded_data = data.decode('utf-8')
+            print(f"Received from Arduino: {decoded_data}")
+
+        except UnicodeDecodeError as e:
+            # Handle any decoding errors gracefully
+            print(f"Error decoding data: {e}")
+
+
+
+def check_serial_data():
+    if serial_port and serial_port.in_waiting > 0:
+        data = serial_port.readline().decode('utf-8').strip()
+        # Process the data (e.g., print it to the terminal)
+        print(f"Received from Arduino: {data}")
 
 
 def _TEST_unpack_data(packed_tokens):
