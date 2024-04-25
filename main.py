@@ -18,14 +18,6 @@ class GUI:
     def setup_bluetooth(self):
         bluetooth.setup_serial_port()
 
-    def bluetooth_send_event(self, data):
-        result = bluetooth.send(data)
-        self.terminal_print(result.msg)
-
-    def check_serial_event(self):
-        bluetooth.check_serial_data()
-        self.root.after(100, self.check_serial_event)
-
     # Constructs the GUI window
     def gui_constructor(self):
         # Set window title
@@ -140,6 +132,15 @@ class GUI:
             self.terminal_print(result.msg)
         if result.data:
             self.bluetooth_send_event(result.data)
+
+    def bluetooth_send_event(self, data):
+        result = bluetooth.send(data)
+        if result.msg:
+            self.terminal_print(result.msg)
+
+    def check_serial_event(self):
+        bluetooth.check_for_serial_data()
+        self.root.after(100, self.check_serial_event)
 
     # Clears text area
     def clear_text_area(self):

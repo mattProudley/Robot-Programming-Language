@@ -19,6 +19,9 @@ def setup_serial_port():
 def _pack_data(tokens):
     packed_tokens = b''  # Initialize an empty byte stream
 
+    # Calculate checksum
+    checksum = 0
+
     # Iterate over tokens and pack each token into the byte stream
     for token, value in tokens:
         # Ensure value is an integer or None
@@ -28,6 +31,15 @@ def _pack_data(tokens):
         # Pack token and value into bytes
         token_byte = bytes(token, 'utf-8')
         packed_tokens += struct.pack('cB', token_byte, value)
+        # Update checksum
+        checksum += token_byte[0] + value
+
+    # Append checksum at the end of data
+    # checksum = checksum + 1 # Test checksum algorithm
+    print("Checksum: ", checksum)
+    packed_tokens += struct.pack('B', checksum & 0xFF)  # Mask checksum to 8 bits
+
+    # Return packed data
     return Result(packed_tokens, "Packed Data")
 
 
@@ -40,7 +52,7 @@ def send(data):
     if data:
         result = _pack_data(data)
         result = _send_packed_data(result.data)  # Serial Port
-        _TEST_unpack_data(result.data)
+        FUNCTION_TEST_unpack_data(result.data)
         return result
     else:
         return Result(False, "No data passed to send function")
@@ -62,23 +74,21 @@ def bluetooth_receive():
             print(f"Error decoding data: {e}")
 
 
-
-def check_serial_data():
+def check_for_serial_data():
     if serial_port and serial_port.in_waiting > 0:
         data = serial_port.readline().decode('utf-8').strip()
-        # Process the data (e.g., print it to the terminal)
         print(f"Received from Arduino: {data}")
 
 
-def _TEST_unpack_data(packed_tokens):
+def FUNCTION_TEST_unpack_data(packed_tokens):
     return_tokens = []
     index = 0
 
-    while index < len(packed_tokens):
+    while index < (len(packed_tokens) -1):
         token_byte, value = struct.unpack_from('cB', packed_tokens, index)
         token = token_byte.decode('utf-8')
         return_tokens.append((token, value))
         index += struct.calcsize('cB')
 
-    print("TEST unpacked tokens: ", return_tokens)
+    print("TEST unpacked tokens W/O checksum: ", return_tokens)
 

@@ -1,61 +1,77 @@
 #include <Arduino.h>
-const int MAX_SIZE = 64;  // Define the maximum size of the buffer
+const int MAX_SIZE = 64; // Define the maximum size of the buffer
+byte data[MAX_SIZE]; // Global buffer to hold received data
+int data_length = 0; // Global variable to hold the length of the received data
 
 void setup() {
   Serial.begin(9600);
 }
 
 void loop() {
-      if(Serial.available()) {
+    if (Serial.available()) {
         download_data();
+        // Only call unpack_data if data_length > 0
+        if (data_length > 0) {
+            unpack_data(); // Call unpack_data without parameters
+        }
     }
 }
 
-
 void download_data() {
-
-    // Define buffer to hold the received data
-    byte receivedData[MAX_SIZE];
-
-    // Variable to track the length of the received data
-    int receivedLength = 0;
+    // Reset the global variables to their initial states
+    memset(data, 0, sizeof(data)); // Reset the data buffer to all zeros
+    data_length = 0; // Reset the data length to zero
 
     // Read data from serial communication into the buffer
-    while (Serial.available() && receivedLength < MAX_SIZE) {
+    while (Serial.available() && data_length < MAX_SIZE) {
         // Read one byte at a time from serial and store it in the buffer
-        receivedData[receivedLength] = Serial.read();
+        data[data_length] = Serial.read();
         // Increment the length of the received data
-        receivedLength++;
+        data_length++;
         // Short delay to allow time for more data to arrive
         delay(10);
     }
-
-    unpack_data(receivedData, receivedLength);
 }
 
-  void unpack_data(byte receivedData[], int receivedLength) {
-    // Variables to hold the current index and token
-    int index = 0;
 
-    // Iterate over the received data
-    while (index < receivedLength) {
-        // Unpack token (1 byte) as a character
-        char token = receivedData[index];
-        index++;  // Move to the next byte
+bool checksum() {
+    // Extract checksum from the last byte of the data
+    byte receivedChecksum = data[data_length - 1];
 
-        // Unpack value (1 byte) as an unsigned 8-bit integer
-        uint8_t value = receivedData[index];
-        index++;  // Move to the next byte
+    // Calculate checksum of received data (excluding the last byte)
+    byte calculatedChecksum = 0;
+    for (int i = 0; i < data_length - 1; i++) {
+        calculatedChecksum += data[i];
+    }
 
-        // Print the unpacked token and value
-        Serial.print("Token: ");
-        Serial.print(token);
-        Serial.print(", Value: ");
-        Serial.println(value);
+    // Compare calculated checksum with received checksum
+    if (calculatedChecksum != receivedChecksum) {
+        Serial.println("Checksum mismatch: Data may be corrupted.");
+        return false; // Return false if there is a checksum mismatch
+    }
 
-        // You can process the token and value here as needed
-        // For example, store them in a data structure, perform some calculations, etc.
+    // Return true if checksums match
+    return true;
+}
+
+
+void unpack_data() {
+    // Use the global variables data and data_length
+    if (checksum()) {
+        int index = 0;
+        while (index < data_length - 1) {
+            char token = data[index];
+            index++;
+            uint8_t value = data[index];
+            index++;
+            Serial.print("Token: ");
+            Serial.print(token);
+            Serial.print(", Value: ");
+            Serial.println(value);
+        }
     }
 }
+
+
 
 
