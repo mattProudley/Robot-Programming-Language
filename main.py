@@ -156,6 +156,8 @@ class GUI:
 
     def terminal_print(self, terminal_message):
         self.terminal.insert(tk.END, f"\n{terminal_message}\n")  # Display message in terminal
+        # Auto-scroll the terminal to the bottom to display the latest message
+        self.terminal.see(tk.END)
 
     # Runs GUI event listener
     def run(self):

@@ -1,7 +1,6 @@
 interpreter:
 interpret data to commands
 automatic terminal print and correct use of result
-terminal auto scroll
 comments and code clarity
 optimise
 
@@ -18,11 +17,9 @@ rerun current program
 
 
 other useful things:
-highlight syntax error code
 in app change com port
 
 errors to test:
-
 contains decimal value: done
 contains no value: done
 unrecognised command: done
@@ -30,7 +27,6 @@ value cannot be a - on some commands: done
 value can be no greater than specific values: done
 limit mov and stop using a variable: done
 value is too large: done
-
 file is too large: need checking
 super large value might crash the program: need checking
 trailing characters: done
