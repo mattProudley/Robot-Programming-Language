@@ -8,7 +8,7 @@ def setup_serial_port():
     global serial_port
     # Set up serial communication with the specified port and baud rate
     try:
-        serial_port = serial.Serial('COM4', 9600, timeout=1) # CHECK COM PORT BEFORE RUNNING
+        serial_port = serial.Serial('COM6', 9600, timeout=1) # CHECK COM PORT BEFORE RUNNING
         print(serial_port)
     except serial.SerialException as e:
         print(f"Failed to open serial port: {e}, CHANGE PORT")
@@ -52,7 +52,6 @@ def send(data):
     if data:
         result = _pack_data(data)
         result = _send_packed_data(result.data)  # Serial Port
-        FUNCTION_TEST_unpack_data(result.data)
         return result
     else:
         return Result(False, "No data passed to send function")
@@ -80,7 +79,7 @@ def check_for_serial_data():
         print(f"Received from Arduino: {data}")
 
 
-def FUNCTION_TEST_unpack_data(packed_tokens):
+def UNIT_TEST_unpack_data(packed_tokens):
     return_tokens = []
     index = 0
 

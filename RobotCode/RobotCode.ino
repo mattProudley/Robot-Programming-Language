@@ -58,6 +58,7 @@ bool checksum() {
 void unpack_data() {
     // Use the global variables data and data_length
     if (checksum()) {
+        Serial.println("Received data");
         int index = 0;
         while (index < data_length - 1) {
             char token = data[index];
@@ -69,7 +70,7 @@ void unpack_data() {
             Serial.print(", Value: ");
             Serial.println(value);
         }
-    }
+    } Serial.println("End of received data");
 }
 
 

@@ -9,6 +9,8 @@ class Result:
 
     def __post_init__(self):
         if self.msg:
+            # Terminal print message for debugging
             # terminal_print(self.msg)
-            print(self.msg)
+            # IDE Terminal print for debugging
             print(self.data)
+            print(self.msg)
