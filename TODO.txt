@@ -1,6 +1,3 @@
-interpreter:
-comments and code clarity
-
 bluetooth functions:
 check for connection loss
 interpret commands over bt

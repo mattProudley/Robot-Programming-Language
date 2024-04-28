@@ -1,29 +1,38 @@
-# Tests core functionality of the program, opening a batch file, compiling, and bluetooth communication
+# Tests core functionality of the program, including file handling, compiling, and Bluetooth communication
 import parser
 import bluetooth
 from file_handling import open_file
 import time
 
-# Define the timeout duration in seconds (e.g., 60 seconds)
+# Define the timeout duration in seconds (e.g., 20 seconds)
 timeout_duration = 20
-# Initialize the start time
+
+# Store the start time of the operation
 start_time = time.time()
 
-if bluetooth.setup_serial_port(): # Setup serial port
-    data = open_file() # Open / Select File
+# Check if the serial port is set up successfully for Bluetooth communication
+if bluetooth.setup_serial_port():
+    # Select and open a file, read the data
+    data = open_file()
     if data:
-        parsed_data = parser.run_parser(data) # Run token compiler
+        # Parse the data using the token compiler
+        parsed_data = parser.run_parser(data)
         if parsed_data:
-            packed_data = bluetooth.send(parsed_data) # Pack and send data over bluetooth
+            # Pack and send the parsed data over Bluetooth
+            packed_data = bluetooth.send(parsed_data)
             if packed_data:
-                bluetooth.UNIT_TEST_unpack_data(packed_data) # Unpack data to ensure data is packed correctly
+                # Unpack the data to ensure the packing was successful
+                bluetooth.UNIT_TEST_unpack_data(packed_data)
 
-                # Check for response from arduino
+                # Continuously check for a response from the Arduino until timeout is reached
                 while True:
-                    bluetooth.check_for_serial_data()  # Check for serial data
-                    elapsed_time = time.time() - start_time  # Calculate the elapsed time since the loop started
-                    # Break the loop if the elapsed time exceeds the timeout duration
+                    # Check for any incoming serial data and print it
+                    bluetooth.check_for_serial_data()
+                    # Calculate the elapsed time since the loop began
+                    elapsed_time = time.time() - start_time
+                    # Exit the loop if the timeout duration is exceeded
                     if elapsed_time > timeout_duration:
                         print("Timeout reached. Exiting loop.")
                         break
-                    time.sleep(0.5)  # Wait to slow terminal print
+                    # Pause briefly to avoid excessive terminal printing
+                    time.sleep(0.5)

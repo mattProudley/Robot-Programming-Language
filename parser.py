@@ -3,38 +3,44 @@ import re
 from utils import print_to_terminal
 
 
-def _split_commands(data_file):
-    # If no data file
+# TODO: Quite a busy function, needs reformatting
+def _clean_split_file(data_file):
+    # Return None and print an error if no data file is provided
     if not data_file:
-        print_to_terminal("Error: No Data File Provided")
+        # If errors return any errors and terminate further validation
+        print_to_terminal("Error: No data file provided")
         return None
 
-    # Remove trailing whitespaces, newlines, and null characters
+    # Remove unnecessary characters (whitespace, newlines, nulls) from the data file
     data = data_file.strip().replace('\n', '').replace('\0', '')
 
-    # Find the index of the last complete statement terminator (;)
+    # Identify the index of the last semicolon (statement terminator)
     last_semicolon_index = data.rfind(';')
     if last_semicolon_index == -1:
-        print_to_terminal("Syntax Error: No appropriate commands provided for syntax check.")
+        # If errors return any errors and terminate further validation
+        print_to_terminal("Syntax Error: No valid commands provided for syntax check.")
         return None
 
-    # Check if the last statement is complete
+    # If the file doesn't end with a semicolon, print an error and return None
     if last_semicolon_index != len(data) - 1:
+        # If errors return any errors and terminate further validation
         print_to_terminal("Syntax Error: File ends unexpectedly.")
         return None
 
-    # Split statements by semicolon
+    # Split data into individual statements by semicolon
     statements = data.split(';')
 
-    # Remove any leftover whitespace created from split
+    # Strip whitespace and filter out empty statements
     clean_data = [statement.strip() for statement in statements if statement.strip()]
 
-    print_to_terminal("Data File Cleaned, Commands Split")
+    # Log that the data file was cleaned and commands split
+    print_to_terminal("Data file cleaned, commands split")
     return clean_data
 
 
 def _compile_patterns():
-    # Pattern captures undesirable value inputs to allow for effective syntax error reports
+    # Define a list of patterns (regular expressions) for different commands
+    # Allows various types of numeric values or decimals through to validate later for better error messaging
     patterns = [
         # MOV command (may or may not include an integer or decimal value)
         r'MOV(?:\s+([-+]?\d+(\.\d+)?))?',
@@ -50,58 +56,59 @@ def _compile_patterns():
         r'END'
     ]
 
+    # Compile each pattern using regular expressions and return the list of compiled patterns
     _compiled_patterns = [re.compile(pattern) for pattern in patterns]
     return _compiled_patterns
 
 
-def _pattern_match(_compiled_patterns, commands):
+def _pattern_match(_compiled_patterns, clean_data):
+    # Validators to confirm the correctness of command values
     validators = {
         'MOV': validate_mov,
         'TURNL': validate_turn,
         'TURNR': validate_turn,
         'STOP': validate_stop,
         'FOR': validate_for,
-        # No validation needed for END command
+        # END command does not require validation
     }
-    # Initialize an empty list to store matched commands
+
+    # List to store commands that match patterns
     matched_data = []
 
-    # Iterate through each command in the provided list of commands
-    for command in commands:
-        # Initialize a boolean flag to indicate if the command is matched
-        matched = False
+    # Iterate over each segment provided
+    for segment in clean_data:
+        matched = False  # Flag to indicate if the command was matched
 
-        # Iterate through each pattern in the predefined patterns list
+        # Try each compiled pattern to see if it matches the command
         for pattern in _compiled_patterns:
-            # Use regular expression to check if the command matches the current pattern
-            match = pattern.fullmatch(command) # Warning: Must use fullmatch or anything loosly resembling code can pass
+            # Check if the command matches the pattern exactly
+            match = pattern.fullmatch(segment)
             if match:
-                # If a match is found, extract the command and value from the matched groups
+                # Extract command name and value if the pattern matches
+                command = segment # Variable name change for clarity
                 cmd_name = re.sub(r'[^A-Z]', '', pattern.pattern)
 
-                # Validate the value if it is not an END command
+                # Validate the command value (if required)
                 if cmd_name != 'END':
                     try:
-                        # Validate the captured value using the appropriate function
                         validators[cmd_name](match.group(1))
                     except ValueError as e:
-                        # Print the error message if validation fails
-                        print_to_terminal( f"Syntax Error: {str(e)} in command '{command}'")
+                        # If errors return any errors and terminate further validation
+                        print_to_terminal(f"Syntax Error: {str(e)} in command '{command}'")
                         return None
 
-                # Append the command to the matched_data list
+                # Add the matched command to the list
                 matched_data.append(command)
-                # Set the matched flag to True
-                matched = True
-                # Exit the inner loop since a match is found for the current command
-                break
+                matched = True  # Command has been matched
+                break  # Exit loop since the command was matched
 
-        # If no match is found for the current command, return a Result object indicating failure
+        # If no pattern matches, print an error and return None
         if not matched:
-            print_to_terminal(f"Syntax Error: Unrecognized command '{command}'")
+            # If errors return any errors and terminate further validation
+            print_to_terminal(f"Syntax Error: Unrecognized command '{segment}'")
             return None
 
-    # Return a Result object indicating success and the list of matched commands
+    # Log successful pattern matching
     print_to_terminal(f"Pattern Matched: {matched_data}")
     return matched_data
 
@@ -110,11 +117,11 @@ def validate_turn(value_str):
     if not value_str:
         raise ValueError("TURN command is missing a degrees value.")
     try:
-        # Attempt to convert the value string to an integer
+        # Convert value string to integer
         value = int(value_str)
     except ValueError:
-        # Raise a ValueError if the conversion fails
         raise ValueError(f"Invalid TURN value '{value_str}'. Expected an integer.")
+    # Check value range
     if not (1 <= value <= 360):
         raise ValueError(f"TURN value {value} out of range (1-360).")
     return None
@@ -124,17 +131,16 @@ def validate_mov(value_str):
     if not value_str:
         raise ValueError("MOV command is missing a steps value.")
     try:
-        # Attempt to convert the value string to an integer
-        value = int(value_str)
+        value = int(value_str)  # Convert value string to integer
     except ValueError:
-        # Raise a ValueError if the conversion fails
         raise ValueError(f"Invalid MOV value '{value_str}'. Expected an integer.")
+    # Check range of MOV value
     if value == 0:
         raise ValueError("MOV value cannot be zero.")
     if value > 100:
-        raise ValueError("MOV value too large. Must be less than 100")
+        raise ValueError("MOV value too large. Must be less than 100.")
     if value < -100:
-        raise ValueError("MOV value too small. Must be greater than -100")
+        raise ValueError("MOV value too small. Must be greater than -100.")
     return None
 
 
@@ -142,11 +148,10 @@ def validate_stop(value_str):
     if not value_str:
         raise ValueError("STOP command is missing a seconds value.")
     try:
-        # Attempt to convert the value string to an integer
-        value = int(value_str)
+        value = int(value_str)  # Convert value string to integer
     except ValueError:
-        # Raise a ValueError if the conversion fails
         raise ValueError(f"Invalid STOP value '{value_str}'. Expected an integer.")
+    # Check range of STOP value
     if value <= 0:
         raise ValueError(f"STOP value {value} must be greater than zero.")
     if not (1 <= value <= 60):
@@ -158,18 +163,17 @@ def validate_for(value_str):
     if not value_str:
         raise ValueError("FOR command is missing a value.")
     try:
-        # Attempt to convert the value string to an integer
-        value = int(value_str)
+        value = int(value_str)  # Convert value string to integer
     except ValueError:
-        # Raise a ValueError if the conversion fails
         raise ValueError(f"Invalid FOR value '{value_str}'. Expected an integer.")
+    # Check range of FOR value
     if not (1 <= value <= 100):
         raise ValueError(f"FOR value {value} out of range (1-100).")
     return None
 
 
-def _tokenize(_pattern_matched_data):
-    # Tokens must be CHARS
+def _tokenize(verified_commands):
+    # Mapping of command types to single-character tokens
     token_map = {
         'MOV': 'M',
         'TURNL': 'L',
@@ -179,95 +183,104 @@ def _tokenize(_pattern_matched_data):
         'END': 'e'
     }
 
-    tokens = []  # Initialize an empty list to store tokens
+    tokens = []  # List to store tokens
 
-    # Iterate through each command in the pattern-matched data
-    for command in _pattern_matched_data:
-        # Iterate through each pattern and its corresponding token in the token_map dictionary
+    # Iterate over each command in pattern-matched data
+    for command in verified_commands:
+        # Iterate over each pattern and its corresponding token
         for pattern, token in token_map.items():
-            # Check if the current command starts with the current pattern
+            # Check if the command starts with the pattern
             if command.startswith(pattern):
-                # Use regular expression to check for a full match of the pattern in the command
+                # Validate the command and extract the value
                 match = re.fullmatch(pattern + r'(\s+(\d+))?', command)
                 if match:
-                    # Extract the value from the command if present, otherwise default to 0
+                    # Extract the integer value, defaulting to 0 if absent
                     value = int(match.group(2)) if match.group(2) else 0
-                    # Append the token and its corresponding value (if any) to the tokens list
+                    # Append the token and value as a tuple to the tokens list
                     tokens.append((token, value))
-                    break  # Exit the inner loop once a match is found
+                    break  # Exit loop after successful match
                 else:
-                    print_to_terminal("Error: tokenizer exception")
+                    # Should never be reached but here incase
+                    print_to_terminal("Error: Tokenizer exception")
                     return None
 
-    # Return a Result object containing the generated tokens and a success message
+    # Log successful tokenization
     print_to_terminal(f"Tokenized: {tokens}")
     return tokens
 
 
-def _check_blocks(_tokenized_data):
-    block_stack = []
-    blocks = 0
-    f_count = 0  # Counter to track consecutive 'f' tokens before an 'e'
+def _check_blocks(tokens):
+    block_stack = []  # Stack to track open blocks
+    blocks = 0  # Counter for valid blocks
+    f_count = 0  # Counter for consecutive 'f' (FOR) tokens
 
-    for i, (token, _) in enumerate(_tokenized_data):
+    # Iterate over each token in the tokenized data
+    for i, (token, _) in enumerate(tokens):
         if token == 'f':
-            # Add 'for' to the stack to track the block
+            # Increment FOR block stack and counter
             block_stack.append(token)
-            f_count += 1  # Increment the counter for consecutive 'f' tokens
+            f_count += 1
 
-            # Check if there are two consecutive 'f' tokens before an 'e'
+            # More than one FOR statement before an END is an error
             if f_count >= 2:
                 print_to_terminal("Syntax Error: More than one FOR statement found before an END")
                 return None
 
         elif token == 'e':
+            # If an END token is found, check the block stack
             if block_stack:
-                # If we encounter an 'e', check the stack
+                # Pop the top item from the block stack
                 stack_top = block_stack.pop()
-
-                # Reset the 'f' counter because we found an 'e' token
+                # Reset FOR counter
                 f_count = 0
 
+                # Ensure the stack top matches a FOR token
                 if stack_top != 'f':
                     print_to_terminal("Syntax Error: Unexpected END statement")
                     return None
                 else:
-                    blocks += 1
+                    blocks += 1  # Valid block found
             else:
-                # If the stack is empty, this 'e' is unmatched
+                # Unmatched END token found
                 print_to_terminal("Syntax Error: END statement before FOR loop reference")
                 return None
 
+    # Ensure no unmatched FOR statements remain in the stack
     if block_stack:
-        # If the stack is not empty, there are unmatched statements
         print_to_terminal("Syntax Error: FOR statement missing an END statement")
         return None
 
     # If the loop completes without errors, the blocks are balanced
-    print_to_terminal(f"Blocks Checked, Found: {blocks} block/s")
-    return _tokenized_data
+    print_to_terminal(f"Blocks checked, found {blocks} block/s")
+    return tokens
 
 
 def run_parser(data_file):
+    # Parse the data file if provided
     if data_file:
-        clean_data = _split_commands(data_file)  # Clean the data file, split data into individual commands
+        # Clean and split the data file into commands
+        clean_data = _clean_split_file(data_file)
 
-        # Check if the data cleaning was successful
+        # If successful, continue with further processing
         if clean_data:
+            # Compile regular expression patterns
             patterns = _compile_patterns()
-            verified_commands = _pattern_match(patterns, clean_data)  # Match cleaned data file against patterns
+            # Match cleaned data against the patterns
+            verified_commands = _pattern_match(patterns, clean_data)
 
-            # Check if the pattern matching was successful
+            # If pattern matching is successful, proceed with tokenization
             if verified_commands:
-                tokens = _tokenize(verified_commands)  # Tokenize the pattern-matched data
+                # Tokenize the verified commands
+                tokens = _tokenize(verified_commands)
 
-                # Check if tokenization was successful
+                # If tokenization is successful, check for balanced blocks
                 if tokens:
-                    final_data = _check_blocks(tokens)  # Check all statement blocks are closed
+                    final_data = _check_blocks(tokens)
 
-                    # Return compiled data file
+                    # Return final compiled data if successful
                     if final_data:
                         return final_data
     else:
+        # Print an error message if no data file is provided
         print_to_terminal("Error: No data file given to parse.")
     return None
