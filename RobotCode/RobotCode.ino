@@ -1,27 +1,44 @@
 #include <Arduino.h>
-const int MAX_SIZE = 64; // Define the maximum size of the buffer
+
+const int MAX_SIZE = 64; // The maximum size of the buffer
 byte data[MAX_SIZE]; // Global buffer to hold received data
 int data_length = 0; // Global variable to hold the length of the received data
+int arrayLength = 0; // Global variable to track the length of the tokens and values arrays
+
+// Global arrays for tokens and values
+char tokens[32];
+uint8_t values[32];
 
 void setup() {
-  Serial.begin(9600);
+    Serial.begin(9600);
 }
 
+// Call execute_actions in loop function
 void loop() {
     if (Serial.available()) {
+        resetValues();
         download_data();
-        // Only call unpack_data if data_length > 0
-        if (data_length > 0) {
-            unpack_data(); // Call unpack_data without parameters
+        if (checksum()) {
+            Serial.println("Received data");
+            unpack_data();
+            execute_actions();
+            Serial.println("End of received data");
         }
     }
 }
 
-void download_data() {
+void resetValues() {
     // Reset the global variables to their initial states
     memset(data, 0, sizeof(data)); // Reset the data buffer to all zeros
     data_length = 0; // Reset the data length to zero
+    arrayLength = 0; // Reset the array length to zero
 
+    // Reset the tokens and values arrays to all zeros
+    memset(tokens, 0, sizeof(tokens));
+    memset(values, 0, sizeof(values));
+}
+
+void download_data() {
     // Read data from serial communication into the buffer
     while (Serial.available() && data_length < MAX_SIZE) {
         // Read one byte at a time from serial and store it in the buffer
@@ -32,7 +49,6 @@ void download_data() {
         delay(10);
     }
 }
-
 
 bool checksum() {
     // Extract checksum from the last byte of the data
@@ -54,25 +70,122 @@ bool checksum() {
     return true;
 }
 
-
 void unpack_data() {
     // Use the global variables data and data_length
-    if (checksum()) {
-        Serial.println("Received data");
         int index = 0;
-        while (index < data_length - 1) {
-            char token = data[index];
-            index++;
-            uint8_t value = data[index];
-            index++;
-            Serial.print("Token: ");
-            Serial.print(token);
-            Serial.print(", Value: ");
-            Serial.println(value);
+        arrayLength = 0; // Reset the arrayLength to 0
+
+    while (index < data_length - 1) {
+        // Read the token
+        char token = data[index];
+        index++;
+
+        // Read the value
+        uint8_t value = data[index];
+        index++;
+
+        // Store the token and value in arrays
+        tokens[arrayLength] = token;
+        values[arrayLength] = value;
+
+        // Increment the array length
+        arrayLength++;
+    }
+}
+
+void execute_actions() {
+    for (int i = 0; i < arrayLength; i++) {
+        char token = tokens[i];
+        uint8_t value = values[i];
+        
+        if (token == 'f') {
+            // Handle the for loop loop
+            uint8_t loop_count = value; // Number of times to repeat
+            i++; // Move to the next token after 'f'
+            
+            // Store the start of the loop block
+            int loop_start = i;
+            
+            // Find the end of the loop block marked by token 'e'
+            int loop_end = -1;
+            for (int j = i; j < arrayLength; j++) {
+                if (tokens[j] == 'e') {
+                    loop_end = j;
+                    break;
+                }
+            }
+            
+            // If 'e' is found
+            if (loop_end != -1) {
+                // Execute the loop block loop_count times
+                for (int k = 0; k < loop_count; k++) {
+                    for (int j = loop_start; j < loop_end; j++) {
+                        execute_single_action(tokens[j], values[j]);
+                    }
+                }
+                
+                // Move the index to the end of the loop block
+                i = loop_end;
+            } else {
+                // If 'e' token not found, print an error message
+                Serial.println("Error: Unable to find end token for for loop.");
+            }
+        } else {
+            // Handle individual action
+            execute_single_action(token, value);
         }
-    } Serial.println("End of received data");
+    }
+}
+
+// Function to handle individual actions
+void execute_single_action(char token, uint8_t value) {
+    switch (token) {
+        case 'M': // MOV
+            move(value);
+            break;
+        case 'L': // TURNL
+            turnLeft(value);
+            break;
+        case 'R': // TURNR
+            turnRight(value);
+            break;
+        case 'S': // STOP
+            stop(value);
+            break;
+        default:
+            Serial.print("Unknown token: ");
+            Serial.println(token);
+            break;
+    }
 }
 
 
+// Placeholder functions for execution
+void move(int steps) {
+    // Implement move functionality
+    Serial.print("Moving ");
+    Serial.print(steps);
+    Serial.println(" steps.");
+}
 
+void turnLeft(int degrees) {
+    // Implement turn left functionality
+    Serial.print("Turning left ");
+    Serial.print(degrees);
+    Serial.println(" degrees.");
+}
+
+void turnRight(int degrees) {
+    // Implement turn right functionality
+    Serial.print("Turning right ");
+    Serial.print(degrees);
+    Serial.println(" degrees.");
+}
+
+void stop(int seconds) {
+    // Implement stop functionality
+    Serial.print("Stopping.");
+    Serial.print(seconds);
+    Serial.println(" Secounds");
+}
 

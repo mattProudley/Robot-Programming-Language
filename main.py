@@ -155,7 +155,7 @@ class GUI:
         self.text_area.insert("1.0", data)  # Insert file contents in text area
 
     def terminal_print(self, terminal_message):
-        self.terminal.insert(tk.END, f"\n{terminal_message}\n")  # Display message in terminal
+        self.terminal.insert(tk.END, f"{terminal_message}\n")  # Display message in terminal
         # Auto-scroll the terminal to the bottom to display the latest message
         self.terminal.see(tk.END)
 

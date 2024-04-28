@@ -4,6 +4,7 @@ from utils import Result
 
 serial_port = None
 
+
 def setup_serial_port():
     global serial_port
     # Set up serial communication with the specified port and baud rate
@@ -16,7 +17,7 @@ def setup_serial_port():
 
 
 # Functions for sending data
-def _pack_data(tokens):
+def _pack_data_with_checksum(tokens):
     packed_tokens = b''  # Initialize an empty byte stream
 
     # Calculate checksum
@@ -48,9 +49,10 @@ def _send_packed_data(packed_data): # Serial Port
     serial_port.write(packed_data)
     return Result(packed_data, "Successfully Compiled and Sent")
 
+
 def send(data):
     if data:
-        result = _pack_data(data)
+        result = _pack_data_with_checksum(data)
         result = _send_packed_data(result.data)  # Serial Port
         return result
     else:

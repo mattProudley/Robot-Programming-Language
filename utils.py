@@ -12,5 +12,4 @@ class Result:
             # Terminal print message for debugging
             # terminal_print(self.msg)
             # IDE Terminal print for debugging
-            print(self.data)
-            print(self.msg)
+            print(self.msg, self.data)

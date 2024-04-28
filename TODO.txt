@@ -1,8 +1,6 @@
 interpreter:
-interpret data to commands
 automatic terminal print and correct use of result
 comments and code clarity
-optimise
 
 bluetooth functions:
 check for connection loss

@@ -1,3 +1,4 @@
-FOR 10;
+FOR 4;
+    MOV 5;
 	TURNL 90;
 END;
