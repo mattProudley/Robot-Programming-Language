@@ -17,3 +17,9 @@ Final Version Features
 Command Execution: Execute commands to control the robot's movement and actions.
 Sensor Integration: Retrieve sensor readings from the robot for monitoring and analysis.
 Syntax: Syntax is explained in a file
+
+Future improvements:
+Better error handling using try, except
+Variables support
+Conditional statements support
+Mathematics Support

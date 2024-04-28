@@ -1,15 +1,22 @@
-from dataclasses import dataclass
-from typing import Optional, Any
+import tkinter as tk
+
+# A global variable to hold the terminal reference
+terminal_reference = None
 
 
-@dataclass
-class Result:
-    data: Any
-    msg: Optional[str]
+def set_terminal_reference(terminal):
+    global terminal_reference
+    terminal_reference = terminal
 
-    def __post_init__(self):
-        if self.msg:
-            # Terminal print message for debugging
-            # terminal_print(self.msg)
-            # IDE Terminal print for debugging
-            print(self.msg, self.data)
+
+def print_to_terminal(message):
+    # Access the global terminal reference
+    global terminal_reference
+    # Print the message to the program terminal
+    if terminal_reference is not None:
+        terminal_reference.insert(tk.END, f"{message}\n")
+        terminal_reference.see(tk.END)
+    # Print message to main IDE terminal
+    print(message)
+
+

@@ -1,26 +1,25 @@
 # Preforms syntax checks and tokenizes batch files and commands
 import re
-from utils import Result
+from utils import print_to_terminal
 
 
 def _split_commands(data_file):
     # If no data file
     if not data_file:
-        return Result(False, "Error: No Data File Provided")
+        print_to_terminal("Error: No Data File Provided")
 
     # Remove trailing whitespaces, newlines, and null characters
     data = data_file.strip().replace('\n', '').replace('\0', '')
 
     # Find the index of the last complete statement terminator (;)
     last_semicolon_index = data.rfind(';')
-
     if last_semicolon_index == -1:
-        return Result(False, "Syntax Error: No appropriate commands provided for syntax check.\n"
-                             "Note: Single commands must still include a ';' e.g. 'MOV 10;'")
+        print_to_terminal("Syntax Error: No appropriate commands provided for syntax check.\n"
+                            "Note: Single commands must still include a ';' e.g. 'MOV 10;'")
 
     # Check if the last statement is complete
     if last_semicolon_index != len(data) - 1:
-        return Result(False, "Syntax Error: File ends unexpectedly.\n"
+        print_to_terminal("Syntax Error: File ends unexpectedly.\n"
                              "Note: All commands must end with a ';' e.g. 'MOV 90;'")
 
     # Split statements by semicolon
@@ -29,7 +28,8 @@ def _split_commands(data_file):
     # Remove any leftover whitespace created from split
     clean_data = [statement.strip() for statement in statements if statement.strip()]
 
-    return Result(clean_data, "Data Cleaned")
+    print_to_terminal("Data File Cleaned, Commands Split")
+    return clean_data
 
 
 def _compile_patterns():
@@ -73,7 +73,7 @@ def _pattern_match(_compiled_patterns, commands):
         # Iterate through each pattern in the predefined patterns list
         for pattern in _compiled_patterns:
             # Use regular expression to check if the command matches the current pattern
-            match = pattern.fullmatch(command) # Must use fullmatch or anything loosly resembling code can pass
+            match = pattern.fullmatch(command) # Warning: Must use fullmatch or anything loosly resembling code can pass
             if match:
                 # If a match is found, extract the command and value from the matched groups
                 cmd_name = re.sub(r'[^A-Z]', '', pattern.pattern)
@@ -85,7 +85,8 @@ def _pattern_match(_compiled_patterns, commands):
                         validators[cmd_name](match.group(1))
                     except ValueError as e:
                         # Print the error message if validation fails
-                        return Result(False, f"Syntax Error: {str(e)} in command '{command}'")
+                        print_to_terminal( f"Syntax Error: {str(e)} in command '{command}'")
+                        return None
 
                 # Append the command to the matched_data list
                 matched_data.append(command)
@@ -96,10 +97,11 @@ def _pattern_match(_compiled_patterns, commands):
 
         # If no match is found for the current command, return a Result object indicating failure
         if not matched:
-            return Result(False, f"Syntax Error: Unrecognized command '{command}'")
+            print_to_terminal(f"Syntax Error: Unrecognized command '{command}'")
 
     # Return a Result object indicating success and the list of matched commands
-    return Result(matched_data, "Pattern Matched")
+    print_to_terminal("Pattern Matched")
+    return matched_data
 
 
 def validate_turn(value_str):
@@ -118,33 +120,33 @@ def validate_turn(value_str):
 
 def validate_mov(value_str):
     if not value_str:
-        raise ValueError("mov command is missing a steps value.")
+        raise ValueError("MOV command is missing a steps value.")
     try:
         # Attempt to convert the value string to an integer
         value = int(value_str)
     except ValueError:
         # Raise a ValueError if the conversion fails
-        raise ValueError(f"Invalid TURN value '{value_str}'. Expected an integer.")
+        raise ValueError(f"Invalid MOV value '{value_str}'. Expected an integer.")
     if value == 0:
-        raise ValueError("mov value cannot be zero.")
+        raise ValueError("MOV value cannot be zero.")
     if value > 100:
-        raise ValueError("mov value too large. Must be less than 100")
+        raise ValueError("MOV value too large. Must be less than 100")
     if value < -100:
-        raise ValueError("mov value too small. Must be greater than -100")
+        raise ValueError("MOV value too small. Must be greater than -100")
     return None
 
 
 def validate_stop(value_str):
     if not value_str:
-        raise ValueError("stop command is missing a seconds value.")
+        raise ValueError("STOP command is missing a seconds value.")
     try:
         # Attempt to convert the value string to an integer
         value = int(value_str)
     except ValueError:
         # Raise a ValueError if the conversion fails
-        raise ValueError(f"Invalid TURN value '{value_str}'. Expected an integer.")
+        raise ValueError(f"Invalid STOP value '{value_str}'. Expected an integer.")
     if value <= 0:
-        raise ValueError(f"stop value {value} must be greater than zero.")
+        raise ValueError(f"STOP value {value} must be greater than zero.")
     if not (1 <= value <= 60):
         raise ValueError(f"STOP value {value} out of range (1-60).")
     return None
@@ -158,11 +160,10 @@ def validate_for(value_str):
         value = int(value_str)
     except ValueError:
         # Raise a ValueError if the conversion fails
-        raise ValueError(f"Invalid TURN value '{value_str}'. Expected an integer.")
+        raise ValueError(f"Invalid FOR value '{value_str}'. Expected an integer.")
     if not (1 <= value <= 100):
         raise ValueError(f"FOR value {value} out of range (1-100).")
     return None
-
 
 
 def _tokenize(_pattern_matched_data):
@@ -194,7 +195,8 @@ def _tokenize(_pattern_matched_data):
                     break  # Exit the inner loop once a match is found
 
     # Return a Result object containing the generated tokens and a success message
-    return Result(tokens, "Tokenized")
+    print_to_terminal("Tokenized")
+    return tokens
 
 
 def _check_blocks(_tokenized_data):
@@ -209,38 +211,40 @@ def _check_blocks(_tokenized_data):
                 # If we encounter an 'end', check the stack
                 stack_top = block_stack.pop()
                 if stack_top != 'f':
-                    return Result(False,  "Error: Unexpected 'end'")
+                    print_to_terminal("Error: Unexpected 'end'")
             else:
                 # If the stack is empty, this 'end' is unmatched
-                return Result(False, "Error: 'end' before reference")
+                print_to_terminal("Error: 'end' before reference")
 
     if block_stack:
         # If the stack is not empty, there are unmatched statements
-        return Result(False, "Error: No 'end' statement for 'for' at index")
+        print_to_terminal("Error: No 'end' statement for 'for' at index")
 
     # If the loop completes without errors, the blocks are balanced
-    return Result(_tokenized_data, "Blocks Checked")
+    print_to_terminal("Blocks Checked")
+    return _tokenized_data
 
 
 def run_parser(data_file):
     if data_file:
-        result = _split_commands(data_file)  # Clean the data file by removing whitespaces and unnecessary characters
+        clean_data = _split_commands(data_file)  # Clean the data file, split data into individual commands
 
         # Check if the data cleaning was successful
-        if result.data:
+        if clean_data:
             patterns = _compile_patterns()
-            result = _pattern_match(patterns, result.data)  # Match the cleaned data file against predefined patterns
+            verified_commands = _pattern_match(patterns, clean_data)  # Match cleaned data file against patterns
 
             # Check if the pattern matching was successful
-            if result.data:
-                result = _tokenize(result.data)  # Tokenize the pattern-matched data\
+            if verified_commands:
+                tokens = _tokenize(verified_commands)  # Tokenize the pattern-matched data
 
                 # Check if tokenization was successful
-                if result.data:
-                    result = _check_blocks(result.data)  # Check all statement blocks are closed
+                if tokens:
+                    final_data = _check_blocks(tokens)  # Check all statement blocks are closed
 
-        return result  # Return the final result containing the tokens or an error message
-
-    return Result(False, "Error: No data file given to parse.")
-
-
+                    # Return compiled data file
+                    if final_data:
+                        return final_data
+    else:
+        print_to_terminal("Error: No data file given to parse.")
+    return None

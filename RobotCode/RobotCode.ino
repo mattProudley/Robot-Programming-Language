@@ -184,7 +184,7 @@ void turnRight(int degrees) {
 
 void stop(int seconds) {
     // Implement stop functionality
-    Serial.print("Stopping.");
+    Serial.print("Stopping ");
     Serial.print(seconds);
     Serial.println(" Secounds");
 }

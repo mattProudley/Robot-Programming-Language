@@ -2,8 +2,9 @@
 import tkinter as tk
 from tkinter import Menu, Text, Scrollbar
 from file_handling import save_file, open_file  # Import file_handling functions for file operations
-import command_parser
+import parser
 import bluetooth
+from utils import set_terminal_reference
 
 
 class GUI:
@@ -12,8 +13,8 @@ class GUI:
         self.root = tk.Tk()
         self.text_area = None  # Initialize text area attribute to None initially.
         self.terminal = None  # Initialize terminal attribute to None initially.
-        self.setup_bluetooth() # Sets up serial port
         self.gui_constructor()  # Call method to construct GUI components
+        self.setup_bluetooth()  # Sets up serial port
 
     def setup_bluetooth(self):
         bluetooth.setup_serial_port()
@@ -60,6 +61,8 @@ class GUI:
         # Create a text widget for terminal output
         self.terminal = Text(terminal_frame, bg="black", fg="white", height=5)
         self.terminal.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # Set the terminal reference to the global variable
+        set_terminal_reference(self.terminal)
 
         # Create a scrollbar for the terminal
         scrollbar = Scrollbar(terminal_frame, orient=tk.VERTICAL, command=self.terminal.yview)
@@ -92,11 +95,9 @@ class GUI:
         def send_command_event():
             command = command_entry.get()
             self.terminal_print(f"Command to be sent: {command}")
-            result = command_parser.run_parser(command)
-            if result.msg:
-                self.terminal_print(result.msg)
-            if result.data:
-                self.bluetooth_send_event(result.data)
+            parsed_commands = parser.run_parser(command)
+            if parsed_commands:
+                bluetooth.send(parsed_commands)
             # Clear the text entry
             command_entry.delete(0, tk.END)
 
@@ -110,33 +111,21 @@ class GUI:
     # Handles all GUI events for opening a file
     def open_file_event(self):
         # Open file and display result in terminal
-        result = open_file()  # Call function to open file...
+        file = open_file()  # Call function to open file...
         # ...function returns data and a message communicating success or error
-        if result.msg:
-            self.terminal_print(result.msg)
-        if result.data:
-            self.set_text_area(result.data)
+        if file:
+            self.set_text_area(file)
 
     # Handles events for saving a file
     def save_file_event(self):
         # Save file and display result in terminal
-        result = save_file(self.get_text_area())  # Call function to save file and pass text...
-        # ... function returns a message communicating success or error
-        if result.msg:
-            self.terminal_print(result.msg)
+        save_file(self.get_text_area())  # Call function to save file and pass text...
 
     def run_file_event(self):
         data = self.get_text_area()
-        result = command_parser.run_parser(data)  # Syntax check and tokenize, return terminal message
-        if result.msg:
-            self.terminal_print(result.msg)
-        if result.data:
-            self.bluetooth_send_event(result.data)
-
-    def bluetooth_send_event(self, data):
-        result = bluetooth.send(data)
-        if result.msg:
-            self.terminal_print(result.msg)
+        parsed_data = parser.run_parser(data)  # Syntax check and tokenize, return terminal message
+        if parsed_data:
+            bluetooth.send(parsed_data)
 
     def check_serial_event(self):
         bluetooth.check_for_serial_data()
@@ -170,3 +159,4 @@ if __name__ == "__main__":
     # Create GUI instance and run it
     gui = GUI()
     gui.run()
+
