@@ -19,10 +19,10 @@ void loop() {
         resetValues();
         download_data();
         if (checksum()) {
-            Serial.println("Received data");
+            Serial.println("Received data, Running Program");
             unpack_data();
             execute_actions();
-            Serial.println("End of received data");
+            Serial.println("End of Program");
         }
     }
 }

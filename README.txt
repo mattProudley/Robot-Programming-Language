@@ -1,10 +1,10 @@
-WIP Robot Programming Language
+Robot Programming Language
 This project is the culmination of my computer systems engineering degree.
 The final software will be designed to control a robot vehicle through simple commands.
 It will read batch files and translate them into commands that drive the robot.
 Additionally, it wil retrieve sensor readings and navigation information from the robot.
 
-Parsing abd tokenization of the language takes place using the python program.
+Parsing and tokenization of the language takes place using the python program.
 The generated tokens are sent to the robot where they are interpreted and trigger movement commands.
 
 
@@ -21,5 +21,8 @@ Syntax: Syntax is explained in a file
 Future improvements:
 Better error handling using try, except
 Variables support
+Nestled loops
 Conditional statements support
 Mathematics Support
+Optimise compilation algorithms
+In app com port adjustment

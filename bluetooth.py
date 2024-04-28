@@ -21,7 +21,6 @@ def setup_serial_port():
 # Functions for sending data
 def _pack_data_with_checksum(data):
     packed_data = b''  # Initialize an empty byte stream
-    print(data)
     # Calculate checksum
     checksum = 0
 
@@ -61,6 +60,7 @@ def send(data):
         return packed_data
     else:
         print_to_terminal("No data passed to send function")
+        return None
 
 
 def check_for_serial_data():
@@ -79,5 +79,5 @@ def UNIT_TEST_unpack_data(packed_data):
         return_tokens.append((token, value))
         index += struct.calcsize('cB')
 
-    print_to_terminal("TEST unpacked tokens W/O checksum: ")
+    print_to_terminal(f"TEST unpacked tokens W/O checksum: {return_tokens}")
 

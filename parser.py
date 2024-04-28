@@ -7,6 +7,7 @@ def _split_commands(data_file):
     # If no data file
     if not data_file:
         print_to_terminal("Error: No Data File Provided")
+        return None
 
     # Remove trailing whitespaces, newlines, and null characters
     data = data_file.strip().replace('\n', '').replace('\0', '')
@@ -14,13 +15,13 @@ def _split_commands(data_file):
     # Find the index of the last complete statement terminator (;)
     last_semicolon_index = data.rfind(';')
     if last_semicolon_index == -1:
-        print_to_terminal("Syntax Error: No appropriate commands provided for syntax check.\n"
-                            "Note: Single commands must still include a ';' e.g. 'MOV 10;'")
+        print_to_terminal("Syntax Error: No appropriate commands provided for syntax check.")
+        return None
 
     # Check if the last statement is complete
     if last_semicolon_index != len(data) - 1:
-        print_to_terminal("Syntax Error: File ends unexpectedly.\n"
-                             "Note: All commands must end with a ';' e.g. 'MOV 90;'")
+        print_to_terminal("Syntax Error: File ends unexpectedly.")
+        return None
 
     # Split statements by semicolon
     statements = data.split(';')
@@ -98,9 +99,10 @@ def _pattern_match(_compiled_patterns, commands):
         # If no match is found for the current command, return a Result object indicating failure
         if not matched:
             print_to_terminal(f"Syntax Error: Unrecognized command '{command}'")
+            return None
 
     # Return a Result object indicating success and the list of matched commands
-    print_to_terminal("Pattern Matched")
+    print_to_terminal(f"Pattern Matched: {matched_data}")
     return matched_data
 
 
@@ -193,35 +195,56 @@ def _tokenize(_pattern_matched_data):
                     # Append the token and its corresponding value (if any) to the tokens list
                     tokens.append((token, value))
                     break  # Exit the inner loop once a match is found
+                else:
+                    print_to_terminal("Error: tokenizer exception")
+                    return None
 
     # Return a Result object containing the generated tokens and a success message
-    print_to_terminal("Tokenized")
+    print_to_terminal(f"Tokenized: {tokens}")
     return tokens
 
 
 def _check_blocks(_tokenized_data):
     block_stack = []
+    blocks = 0
+    f_count = 0  # Counter to track consecutive 'f' tokens before an 'e'
 
     for i, (token, _) in enumerate(_tokenized_data):
         if token == 'f':
             # Add 'for' to the stack to track the block
             block_stack.append(token)
+            f_count += 1  # Increment the counter for consecutive 'f' tokens
+
+            # Check if there are two consecutive 'f' tokens before an 'e'
+            if f_count >= 2:
+                print_to_terminal("Syntax Error: More than one FOR statement found before an END")
+                return None
+
         elif token == 'e':
             if block_stack:
-                # If we encounter an 'end', check the stack
+                # If we encounter an 'e', check the stack
                 stack_top = block_stack.pop()
+
+                # Reset the 'f' counter because we found an 'e' token
+                f_count = 0
+
                 if stack_top != 'f':
-                    print_to_terminal("Error: Unexpected 'end'")
+                    print_to_terminal("Syntax Error: Unexpected END statement")
+                    return None
+                else:
+                    blocks += 1
             else:
-                # If the stack is empty, this 'end' is unmatched
-                print_to_terminal("Error: 'end' before reference")
+                # If the stack is empty, this 'e' is unmatched
+                print_to_terminal("Syntax Error: END statement before FOR loop reference")
+                return None
 
     if block_stack:
         # If the stack is not empty, there are unmatched statements
-        print_to_terminal("Error: No 'end' statement for 'for' at index")
+        print_to_terminal("Syntax Error: FOR statement missing an END statement")
+        return None
 
     # If the loop completes without errors, the blocks are balanced
-    print_to_terminal("Blocks Checked")
+    print_to_terminal(f"Blocks Checked, Found: {blocks} block/s")
     return _tokenized_data
 
 

@@ -94,10 +94,10 @@ class GUI:
 
         def send_command_event():
             command = command_entry.get()
-            self.terminal_print(f"Command to be sent: {command}")
-            parsed_commands = parser.run_parser(command)
-            if parsed_commands:
-                bluetooth.send(parsed_commands)
+            parsed_command = parser.run_parser(command)
+            if parsed_command:
+                self.terminal_print(f"Command to be sent: {command}")
+                bluetooth.send(parsed_command)
             # Clear the text entry
             command_entry.delete(0, tk.END)
 
