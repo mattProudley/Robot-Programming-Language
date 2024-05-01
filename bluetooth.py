@@ -83,6 +83,7 @@ def UNIT_TEST_unpack_data(packed_data):
     # Print unpacked tokens and values to the terminal for testing
     print_to_terminal(f"TEST unpacked tokens W/O checksum: {return_tokens}")
 
+
 def check_for_serial_data():
     # Checks for incoming data from the serial port
     if serial_port and serial_port.in_waiting > 0:

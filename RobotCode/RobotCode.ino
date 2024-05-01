@@ -9,8 +9,18 @@ int arrayLength = 0; // Global variable to track the length of the tokens and va
 char tokens[32];
 uint8_t values[32];
 
+#define MOTOR_DIRECTION     0 //If the direction is reversed, change 0 to 1
+#define PIN_DIRECTION_RIGHT 3
+#define PIN_DIRECTION_LEFT  4
+#define PIN_MOTOR_PWM_RIGHT 5
+#define PIN_MOTOR_PWM_LEFT  6
+
 void setup() {
     Serial.begin(9600);
+    pinMode(PIN_DIRECTION_LEFT, OUTPUT);
+    pinMode(PIN_MOTOR_PWM_LEFT, OUTPUT);
+    pinMode(PIN_DIRECTION_RIGHT, OUTPUT);
+    pinMode(PIN_MOTOR_PWM_RIGHT, OUTPUT);
 }
 
 // Call execute_actions in loop function
@@ -166,6 +176,9 @@ void move(int steps) {
     Serial.print("Moving ");
     Serial.print(steps);
     Serial.println(" steps.");
+    motorRun(200, 200);
+    delay(steps * 1000); 
+    motorRun(0, 0);
 }
 
 void turnLeft(int degrees) {
@@ -187,5 +200,28 @@ void stop(int seconds) {
     Serial.print("Stopping ");
     Serial.print(seconds);
     Serial.println(" Secounds");
+    motorRun(0, 0);
+    delay(seconds * 1000); // Times 1000 so the seconds value corrisponds to the delay function (1000 = 1 second)
+}
+
+void motorRun(int speedl, int speedr) {
+  int dirL = 0, dirR = 0;
+  if (speedl > 0) {
+    dirL = 0 ^ MOTOR_DIRECTION;
+  } else {
+    dirL = 1 ^ MOTOR_DIRECTION;
+    speedl = -speedl;
+  }
+
+  if (speedr > 0) {
+    dirR = 1 ^ MOTOR_DIRECTION;
+  } else {
+    dirR = 0 ^ MOTOR_DIRECTION;
+    speedr = -speedr;
+  }
+    digitalWrite(PIN_DIRECTION_LEFT, dirL);
+  digitalWrite(PIN_DIRECTION_RIGHT, dirR);
+  analogWrite(PIN_MOTOR_PWM_LEFT, speedl);
+  analogWrite(PIN_MOTOR_PWM_RIGHT, speedr);
 }
 

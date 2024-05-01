@@ -12,18 +12,18 @@ Batch File Processing:  Parse data files, perform syntax checks, tokenize comman
 Command Driven Mode: A separate window to write and execute individual commands.
 Data interpretation: Interfaces with an Arduino program that reads tokens,
     interprets them into specific functions, and communicates a response back to the GUI.
+Movement Functionality: The robot will preform movements based on the script uploaded.
 For Loop Support: The language includes support for FOR loops, allowing execution of commands multiple times.
     However, it does not currently support nested FOR loops.
 
 Final Version Features:
-Movement Functionality: Add movement functionality to MOV, TURN and STOP functions.
 Sensor Integration: Retrieve sensor readings from the robot for monitoring and analysis.
 Syntax: Syntax is explained in a file
 
 Future improvements:
 Better error handling using try, except
 Variables support
-Nestled loops
+Nested loops
 Conditional statements support
 Mathematics Support
 Optimise compilation algorithms
