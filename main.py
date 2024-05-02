@@ -121,10 +121,10 @@ class GUI:
         if parsed_data:
             bluetooth.send(parsed_data)  # Send parsed data over Bluetooth
 
-    def check_serial_event(self):
+    def check_serial_data_event(self):
         # Check for serial data, print if available, and schedule next check
         bluetooth.check_for_serial_data()
-        self.root.after(100, self.check_serial_event)  # Schedule next check in 100ms
+        self.root.after(100, self.check_serial_data_event)  # Schedule next check in 100ms
 
     def clear_text_area(self):
         # Clear the text area
@@ -146,7 +146,7 @@ class GUI:
 
     def run(self):
         # Run the main event loop of the GUI
-        self.check_serial_event()  # Routinely check for serial data
+        self.check_serial_data_event()  # Routinely check for serial data
         self.root.mainloop()  # Start the main loop
 
 

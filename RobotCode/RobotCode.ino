@@ -86,13 +86,21 @@ float getSonarDistance() {
 // Call execute_actions in loop function
 void loop() {
     if (Serial.available()) {
-        resetValues();
-        download_data();
-        if (checksum()) {
-            Serial.println("Received data, Running Program");
-            unpack_data();
-            execute_actions();
-            Serial.println("End of Program");
+        char incomingChar = Serial.read(); // Read a single character from the serial port
+        // If the incoming character is 'p', respond with 'p' and return
+        if (incomingChar == 'p') {
+            Serial.write('p'); // Send 'p' back to acknowledge the ping
+            return; // Exit the function to avoid further processing
+        }
+        else { // If recived data is not a ping
+          resetValues();
+          download_data(incomingChar); // Pass intially read char to download function so its appended to the data array
+          if (checksum()) {
+              Serial.println("Received data, Running Program");
+              unpack_data();
+              execute_actions();
+              Serial.println("End of Program");
+          }
         }
     }
 }
@@ -108,7 +116,12 @@ void resetValues() {
     memset(values, 0, sizeof(values));
 }
 
-void download_data() {
+void download_data(char initialChar) {
+    // Add first char to list and continue downloading data
+    data[data_length] = initialChar;
+    // Increment the length of the received data
+    data_length++;
+    delay(10);
     // Read data from serial communication into the buffer
     while (Serial.available() && data_length < MAX_SIZE) {
         // Read one byte at a time from serial and store it in the buffer
