@@ -11,7 +11,7 @@ uint8_t values[32];
 
 #define PIN_SONIC_TRIG      7 // Pin for sonar trigger
 #define PIN_SONIC_ECHO      8 // Pin for sonar echo
-#define MOTOR_DIRECTION     0 // If the direction is reversed, change 0 to 1
+#define MOTOR_DIRECTION     1 // If the direction is reversed, change 0 to 1
 #define PIN_DIRECTION_LEFT  4
 #define PIN_DIRECTION_RIGHT 3
 #define PIN_MOTOR_PWM_LEFT  6
