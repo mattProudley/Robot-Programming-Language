@@ -2,6 +2,8 @@ bluetooth functions:
 check for connection loss
 send sensor readings
 stop function
+Move back
+Support value 360?
 
 errors to test:
 contains decimal value: done

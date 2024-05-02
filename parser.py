@@ -185,24 +185,23 @@ def _tokenize(verified_commands):
 
     tokens = []  # List to store tokens
 
-    # Iterate over each command in pattern-matched data
+    # Iterate over each command in the list
     for command in verified_commands:
-        # Iterate over each pattern and its corresponding token
-        for pattern, token in token_map.items():
-            # Check if the command starts with the pattern
-            if command.startswith(pattern):
-                # Validate the command and extract the value
-                match = re.fullmatch(pattern + r'(\s+(\d+))?', command)
-                if match:
-                    # Extract the integer value, defaulting to 0 if absent
-                    value = int(match.group(2)) if match.group(2) else 0
-                    # Append the token and value as a tuple to the tokens list
-                    tokens.append((token, value))
-                    break  # Exit loop after successful match
-                else:
-                    # Should never be reached but here incase
-                    print_to_terminal("Error: Tokenizer exception")
-                    return None
+        # Split the command to extract the command type and the value
+        command_parts = command.split()
+        command_type = command_parts[0]
+
+        # Use the token_map to find the corresponding token
+        if command_type in token_map:
+            token = token_map[command_type]
+            # Determine the value; assume 0 if not present
+            value = int(command_parts[1]) if len(command_parts) > 1 else 0
+            # Append the token and value as a tuple to the tokens list
+            tokens.append((token, value))
+        else:
+            # Handle any unexpected command types
+            print_to_terminal(f"Error: Unexpected command type '{command_type}'")
+            return None
 
     # Log successful tokenization
     print_to_terminal(f"Tokenized: {tokens}")

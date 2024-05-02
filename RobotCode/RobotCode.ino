@@ -232,12 +232,23 @@ void execute_single_action(char token, uint8_t value) {
 
 // Placeholder functions for execution
 void move(int steps) {
-    Serial.print("Moving ");
-    Serial.print(steps);
-    Serial.println(" steps.");
-    motorRun(200, 200);
-    delay(steps * 1000); 
-    motorRun(0, 0);
+    if(steps < 0) {
+      Serial.print("Moving back ");
+      Serial.print(steps);
+      Serial.println(" steps.");
+      motorRun(-200, -200);
+      delay(steps * 1000); 
+      motorRun(0, 0);
+    }
+
+    if(steps > 0) {
+      Serial.print("Moving forward ");
+      Serial.print(steps);
+      Serial.println(" steps.");
+      motorRun(200, 200);
+      delay(steps * 1000); 
+      motorRun(0, 0);
+    }
 }
 
 void turnLeft(int degrees) {
