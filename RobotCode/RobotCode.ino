@@ -7,7 +7,7 @@ int arrayLength = 0; // Global variable to track the length of the tokens and va
 
 // Global arrays for tokens and values
 char tokens[32];
-uint8_t values[32];
+uint16_t values[32];
 
 #define PIN_SONIC_TRIG      7 // Pin for sonar trigger
 #define PIN_SONIC_ECHO      8 // Pin for sonar echo
@@ -93,10 +93,15 @@ void loop() {
         }
         else { // If received data is not a ping
           resetValues();
-          download_data(incomingChar); // Pass initially read char to download function so its appended to the data array
-          if (checksum()) {
+          // Add first char to list and continue downloading data
+          data[data_length] = incomingChar;
+          // Increment the length of the received data
+          data_length++;
+          delay(10); // Wait to receive more data
+          download_data(); // Download rest of data
+          bool valid_data = unpack_data(); // Unpack data and calculate checksum
+          if (valid_data) {
               Serial.println("Received data, Running Program");
-              unpack_data();
               execute_actions();
               Serial.println("End of Program");
           }
@@ -115,12 +120,7 @@ void resetValues() {
     memset(values, 0, sizeof(values));
 }
 
-void download_data(char initialChar) {
-    // Add first char to list and continue downloading data
-    data[data_length] = initialChar;
-    // Increment the length of the received data
-    data_length++;
-    delay(10);
+void download_data() {
     // Read data from serial communication into the buffer
     while (Serial.available() && data_length < MAX_SIZE) {
         // Read one byte at a time from serial and store it in the buffer
@@ -130,41 +130,40 @@ void download_data(char initialChar) {
         // Short delay to allow time for more data to arrive
         delay(10);
     }
+    data_length += -1; // Removes a value from data length so its the same size of data array
 }
 
-bool checksum() {
-    // Extract checksum from the last byte of the data
-    byte receivedChecksum = data[data_length - 1];
-
-    // Calculate checksum of received data (excluding the last byte)
-    byte calculatedChecksum = 0;
-    for (int i = 0; i < data_length - 1; i++) {
-        calculatedChecksum += data[i];
-    }
-
-    // Compare calculated checksum with received checksum
-    if (calculatedChecksum != receivedChecksum) {
-        Serial.println("Checksum mismatch: Data may be corrupted.");
-        return false; // Return false if there is a checksum mismatch
-    }
-
-    // Return true if checksums match
-    return true;
-}
-
-void unpack_data() {
+bool unpack_data() {
     // Use the global variables data and data_length
-        int index = 0;
-        arrayLength = 0; // Reset the arrayLength to 0
-
-    while (index < data_length - 1) {
-        // Read the token
+    int index = 0;
+    arrayLength = 0; // Reset the arrayLength to 0
+    uint16_t calculatedChecksum = 0; // Variable to store checksum
+    uint8_t receivedChecksum = data[data_length]; // Removes the final byte as this is the checksum
+    Serial.print("Data Length: ");
+    Serial.println(data_length - 1);
+    for(int i = 0; i < data_length; i++) {
+      Serial.print("Data: ");
+      Serial.println(data[i]);
+    }
+    while (index < data_length - 1) { // For length of recived data minus last byte (Checksum)
+        // Read the token (1 byte)
         char token = data[index];
+        Serial.print("Token: ");
+        Serial.println(token);
         index++;
 
-        // Read the value
-        uint8_t value = data[index];
-        index++;
+        // Read the 16-bit value (2 bytes combined)
+        // Combine two bytes from the data buffer to form a 16-bit value (uint16_t).
+        uint8_t lower_byte = data[index];
+        uint8_t upper_byte = data[index + 1];
+        Serial.print("Lower Byte: ");
+        Serial.println(lower_byte);
+        Serial.print("Upper Byte: ");
+        Serial.println(upper_byte);
+        uint16_t value = (upper_byte << 8) | lower_byte;
+        Serial.print("Value: ");
+        Serial.println(value);
+        index += 2;  // Increment index by 2 to skip the two bytes read
 
         // Store the token and value in arrays
         tokens[arrayLength] = token;
@@ -172,13 +171,36 @@ void unpack_data() {
 
         // Increment the array length
         arrayLength++;
+
+        // Calculate checksum
+        calculatedChecksum += token + value;
+        Serial.print("C: ");
+        Serial.println(calculatedChecksum);
     }
+  // Mask Checksum (this is done to mimic python scrpit)
+  calculatedChecksum &= 0xFF;
+  Serial.print("F: ");
+  Serial.println(calculatedChecksum);
+
+  if (calculatedChecksum == receivedChecksum){
+    return true;
+  }
+
+  else {
+    Serial.println("Checksum mismatch: Data may be corrupted.");
+    Serial.print("Calculated Checksum: ");
+    Serial.println(calculatedChecksum);
+    Serial.print("Received Checksum: ");
+    Serial.println(receivedChecksum);
+    return false;
+  }
+
 }
 
 void execute_actions() {
     for (int i = 0; i < arrayLength; i++) {
         char token = tokens[i];
-        uint8_t value = values[i];
+        uint16_t value = values[i];
         
         if (token == 'f') {
             // Handle the for loop loop
@@ -220,7 +242,7 @@ void execute_actions() {
 }
 
 // Function to handle individual actions
-void execute_single_action(char token, uint8_t value) {
+void execute_single_action(char token, uint16_t value) {
     switch (token) {
         case 'M': // MOV
             move(value);

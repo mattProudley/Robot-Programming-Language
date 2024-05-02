@@ -14,7 +14,7 @@ def setup_serial_port():
     try:
         print_to_terminal("Attempting to connect to serial")
         # Attempt to create a Serial object with the specified parameters
-        serial_port = serial.Serial('COM8', 9600, timeout=1)  # Set port and baud rate
+        serial_port = serial.Serial('COM6', 9600, timeout=1)  # Set port and baud rate
         # If successful, print confirmation to terminal
         print_to_terminal("Successfully connected to serial port")
         return True  # Return True to indicate success
@@ -44,7 +44,6 @@ def _pack_data_with_checksum(data):
         # Convert token to bytes and pack token and value as bytes
         token_byte = bytes(token, 'utf-8')
         packed_data += struct.pack('c h', token_byte, value)
-        print(packed_data)
         # Update checksum with token and value bytes
         checksum += token_byte[0] + value
 
@@ -108,6 +107,7 @@ def check_for_serial_data():
 
 
 def UNIT_TEST_unpack_data(packed_data):
+    print(packed_data)
     # Unpacks data for testing purposes
     return_tokens = []  # Initialize an empty list to hold the unpacked tokens and values
     index = 0  # Initialize index for iteration
@@ -123,5 +123,5 @@ def UNIT_TEST_unpack_data(packed_data):
         index += struct.calcsize('c h')
 
     # Print unpacked tokens and values to the terminal for testing
-    print_to_terminal(f"TEST unpacked tokens W/O checksum: {return_tokens}")
+    print(f"TEST unpacked tokens W/O checksum: {return_tokens}")
 
