@@ -2,6 +2,7 @@
 send sensor readings
 Move back
 Support value 360?
+obstacle detection is only after a complete movememt
 
 errors to test:
 contains decimal value: done
