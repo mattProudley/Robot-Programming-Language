@@ -55,7 +55,7 @@ def _pack_data_with_checksum(data):
     return packed_data  # Return the packed data with appended checksum
 
 
-def ping_serial():
+def _ping_serial():
     global serial_port
     try:
         # Convert 'p' to bytes using encode()
@@ -81,7 +81,7 @@ def ping_serial():
 def _transmit_data(packed_data):
     # Transmits packed data over the serial port
     global serial_port  # Use global serial_port variable
-    if ping_serial():
+    if _ping_serial():
         try:
             serial_port.write(packed_data)  # Send the packed data over the serial port
             print_to_terminal("Successfully Sent")  # Print confirmation message to terminal
