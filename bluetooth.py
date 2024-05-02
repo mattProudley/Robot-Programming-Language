@@ -43,12 +43,14 @@ def _pack_data_with_checksum(data):
             value = 0
         # Convert token to bytes and pack token and value as bytes
         token_byte = bytes(token, 'utf-8')
-        packed_data += struct.pack('cB', token_byte, value)
+        packed_data += struct.pack('c h', token_byte, value)
+        print(packed_data)
         # Update checksum with token and value bytes
         checksum += token_byte[0] + value
 
     # Append checksum at the end of packed data, masking it to 8 bits
-    packed_data += struct.pack('B', checksum & 0xFF)
+    checksum = checksum & 0xFF
+    packed_data += struct.pack('B', checksum)
     # Print confirmation messages to the terminal
     print_to_terminal(f"Data packed {packed_data}")
     print_to_terminal(f"Checksum: {checksum}")
@@ -69,6 +71,7 @@ def _ping_serial():
     else:
         print_to_terminal("Ping operation failed, data failed to send. Please check connection to robot")
         return False
+
 
 def _transmit_data(packed_data):
     # Transmits packed data over the serial port
@@ -110,14 +113,14 @@ def UNIT_TEST_unpack_data(packed_data):
     index = 0  # Initialize index for iteration
 
     # Iterate through the packed data, unpacking each token-value pair
-    while index < (len(packed_data) -1):
+    while index < (len(packed_data) - 1):
         # Unpack token and value from the packed data
-        token_byte, value = struct.unpack_from('cB', packed_data, index)
+        token_byte, value = struct.unpack_from('c h', packed_data, index)
         token = token_byte.decode('utf-8')
         # Add the unpacked token and value to the list
         return_tokens.append((token, value))
         # Increment index by the size of the unpacked data
-        index += struct.calcsize('cB')
+        index += struct.calcsize('c h')
 
     # Print unpacked tokens and values to the terminal for testing
     print_to_terminal(f"TEST unpacked tokens W/O checksum: {return_tokens}")
