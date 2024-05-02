@@ -57,38 +57,25 @@ def _pack_data_with_checksum(data):
 
 def _ping_serial():
     global serial_port
-    try:
-        # Convert 'p' to bytes using encode()
-        serial_port.write(b'p')  # Send the ping data over the serial port as bytes
-        time.sleep(0.5)
-        response = serial_port.read()  # Read the response from the serial port
+    # Convert 'p' to bytes using encode()
+    serial_port.write(b'p')  # Send the ping data over the serial port as bytes
+    time.sleep(0.5)
+    response = serial_port.read()  # Read the response from the serial port
 
-        # Convert the response from bytes to string
-        if response == b'p':
-            print_to_terminal("Ping successful")
-            return True
-        else:
-            print_to_terminal("Ping operation failed, data failed to send")
-            return False
-    except serial.SerialTimeoutException as e:
-        print_to_terminal(f"Ping operation timed out: {e}")
+    # Convert the response from bytes to string
+    if response == b'p':
+        print_to_terminal("Ping successful")
+        return True
+    else:
+        print_to_terminal("Ping operation failed, data failed to send. Please check connection to robot")
         return False
-    except serial.SerialException as e:
-        print_to_terminal(f"Serial exception occurred during ping: {e}")
-        return False
-
 
 def _transmit_data(packed_data):
     # Transmits packed data over the serial port
     global serial_port  # Use global serial_port variable
     if _ping_serial():
-        try:
-            serial_port.write(packed_data)  # Send the packed data over the serial port
-            print_to_terminal("Successfully Sent")  # Print confirmation message to terminal
-        except serial.SerialTimeoutException as e:
-            print_to_terminal(f"Write operation timed out: {e}")
-        except serial.SerialException as e:
-            print_to_terminal(f"Serial exception occurred during write: {e}")
+        serial_port.write(packed_data)  # Send the packed data over the serial port
+        print_to_terminal("Successfully Sent")  # Print confirmation message to terminal
 
 
 def send(data):

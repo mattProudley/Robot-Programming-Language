@@ -83,7 +83,6 @@ float getSonarDistance() {
     return distance;
 }
 
-// Call execute_actions in loop function
 void loop() {
     if (Serial.available()) {
         char incomingChar = Serial.read(); // Read a single character from the serial port
@@ -92,9 +91,9 @@ void loop() {
             Serial.write('p'); // Send 'p' back to acknowledge the ping
             return; // Exit the function to avoid further processing
         }
-        else { // If recived data is not a ping
+        else { // If received data is not a ping
           resetValues();
-          download_data(incomingChar); // Pass intially read char to download function so its appended to the data array
+          download_data(incomingChar); // Pass initially read char to download function so its appended to the data array
           if (checksum()) {
               Serial.println("Received data, Running Program");
               unpack_data();
