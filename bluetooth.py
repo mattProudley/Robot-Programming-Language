@@ -36,18 +36,21 @@ def _pack_data_with_checksum(data):
     packed_data = b''  # Initialize an empty byte stream
     checksum = 0  # Initialize checksum to 0
 
-    # Iterate over the data list, contains tuples of (token, value)
+    # Iterate over the data list, which contains tuples of (token, value)
     for token, value in data:
-        # If value is None (in the case of END; ), set it to 0 for consistency
-        if value is None:
-            value = 0
-        # Convert token to bytes and pack token and value as bytes
+        # Convert token to bytes
         token_byte = bytes(token, 'utf-8')
-        packed_data += struct.pack('c h', token_byte, value)
-        # Update checksum with token and value bytes
-        checksum += token_byte[0] + value
+        # Split the 16-bit value into two 8-bit bytes
+        lower_byte = value & 0xFF
+        upper_byte = (value >> 8) & 0xFF
+        # Pack the token and the two bytes of the value using format 'c 2B' (char 2bytes)
+        packed_data += struct.pack('c 2B', token_byte, lower_byte, upper_byte)
+        # Update checksum with the token byte and the sum of the two value bytes
+        checksum += token_byte[0] + lower_byte + upper_byte
+        print(checksum)
 
     # Append checksum at the end of packed data, masking it to 8 bits
+    # checksum += 1 # Test
     checksum = checksum & 0xFF
     packed_data += struct.pack('B', checksum)
     # Print confirmation messages to the terminal
@@ -112,15 +115,18 @@ def UNIT_TEST_unpack_data(packed_data):
     return_tokens = []  # Initialize an empty list to hold the unpacked tokens and values
     index = 0  # Initialize index for iteration
 
-    # Iterate through the packed data, unpacking each token-value pair
+    # Iterate through the packed data, unpacking each token-value pair(- checksum byte)
     while index < (len(packed_data) - 1):
-        # Unpack token and value from the packed data
-        token_byte, value = struct.unpack_from('c h', packed_data, index)
+        # Unpack token and two 8-bit bytes (lower and upper) of the value from the packed data
+        token_byte, lower_byte, upper_byte = struct.unpack_from('c 2B', packed_data, index)
+        # Decode the token byte to a string
         token = token_byte.decode('utf-8')
+        # Combine the lower and upper bytes to form the original value
+        value = (upper_byte << 8) | lower_byte
         # Add the unpacked token and value to the list
         return_tokens.append((token, value))
         # Increment index by the size of the unpacked data
-        index += struct.calcsize('c h')
+        index += struct.calcsize('c 2B')
 
     # Print unpacked tokens and values to the terminal for testing
     print(f"TEST unpacked tokens W/O checksum: {return_tokens}")

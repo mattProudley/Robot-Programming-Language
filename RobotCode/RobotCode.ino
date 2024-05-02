@@ -139,30 +139,16 @@ bool unpack_data() {
     arrayLength = 0; // Reset the arrayLength to 0
     uint16_t calculatedChecksum = 0; // Variable to store checksum
     uint8_t receivedChecksum = data[data_length]; // Removes the final byte as this is the checksum
-    Serial.print("Data Length: ");
-    Serial.println(data_length - 1);
-    for(int i = 0; i < data_length; i++) {
-      Serial.print("Data: ");
-      Serial.println(data[i]);
-    }
     while (index < data_length - 1) { // For length of recived data minus last byte (Checksum)
         // Read the token (1 byte)
         char token = data[index];
-        Serial.print("Token: ");
-        Serial.println(token);
         index++;
 
         // Read the 16-bit value (2 bytes combined)
         // Combine two bytes from the data buffer to form a 16-bit value (uint16_t).
         uint8_t lower_byte = data[index];
         uint8_t upper_byte = data[index + 1];
-        Serial.print("Lower Byte: ");
-        Serial.println(lower_byte);
-        Serial.print("Upper Byte: ");
-        Serial.println(upper_byte);
         uint16_t value = (upper_byte << 8) | lower_byte;
-        Serial.print("Value: ");
-        Serial.println(value);
         index += 2;  // Increment index by 2 to skip the two bytes read
 
         // Store the token and value in arrays
@@ -173,14 +159,10 @@ bool unpack_data() {
         arrayLength++;
 
         // Calculate checksum
-        calculatedChecksum += token + value;
-        Serial.print("C: ");
-        Serial.println(calculatedChecksum);
+        calculatedChecksum += token + lower_byte + upper_byte;
     }
   // Mask Checksum (this is done to mimic python scrpit)
   calculatedChecksum &= 0xFF;
-  Serial.print("F: ");
-  Serial.println(calculatedChecksum);
 
   if (calculatedChecksum == receivedChecksum){
     return true;
@@ -271,7 +253,7 @@ void move(int steps) {
       Serial.print(steps);
       Serial.println(" steps.");
       motorRun(-200, -200);
-      delay(steps * 1000); 
+      delay(-steps * 1000); // Minus steps to make steps a positive value
       motorRun(0, 0);
     }
 
