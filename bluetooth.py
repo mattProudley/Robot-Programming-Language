@@ -12,7 +12,7 @@ def setup_serial_port():
     global serial_port  # Declare serial_port as global to modify the variable
     try:
         # Attempt to create a Serial object with the specified parameters
-        serial_port = serial.Serial('COM6', 9600, timeout=1)  # Set port and baud rate
+        serial_port = serial.Serial('COM8', 9600, timeout=1)  # Set port and baud rate
         # If successful, print confirmation to terminal
         print_to_terminal("Successfully connected to serial port")
         return True  # Return True to indicate success

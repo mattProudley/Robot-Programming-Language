@@ -9,11 +9,18 @@ int arrayLength = 0; // Global variable to track the length of the tokens and va
 char tokens[32];
 uint8_t values[32];
 
-#define MOTOR_DIRECTION     0 //If the direction is reversed, change 0 to 1
-#define PIN_DIRECTION_RIGHT 3
+#define PIN_SONIC_TRIG      7 // Pin for sonar trigger
+#define PIN_SONIC_ECHO      8 // Pin for sonar echo
+#define MOTOR_DIRECTION     0 // If the direction is reversed, change 0 to 1
 #define PIN_DIRECTION_LEFT  4
-#define PIN_MOTOR_PWM_RIGHT 5
+#define PIN_DIRECTION_RIGHT 3
 #define PIN_MOTOR_PWM_LEFT  6
+#define PIN_MOTOR_PWM_RIGHT 5
+
+#define MAX_DISTANCE        1000 // Maximum distance for sonar measurement in cm
+#define SONIC_TIMEOUT       (MAX_DISTANCE * 60) // Time out for sonar in microseconds
+#define SOUND_VELOCITY      340 // Speed of sound in air (340 m/s)
+#define SAFE_DISTANCE       40.0 // Define a safe distance threshold in cm
 
 void setup() {
     Serial.begin(9600);
@@ -21,6 +28,59 @@ void setup() {
     pinMode(PIN_MOTOR_PWM_LEFT, OUTPUT);
     pinMode(PIN_DIRECTION_RIGHT, OUTPUT);
     pinMode(PIN_MOTOR_PWM_RIGHT, OUTPUT);
+    pinMode(PIN_SONIC_TRIG, OUTPUT);
+    pinMode(PIN_SONIC_ECHO, INPUT);
+    
+    // Set up the timer interrupt for sonar distance checks
+    noInterrupts(); // Disable interrupts
+    TCCR1A = 0; // Clear register A
+    TCCR1B = 0; // Clear register B
+    TCNT1 = 0; // Initialize counter
+    OCR1A = 15624; // Set compare match value for 1 Hz interrupts (16MHz / 1024 / 1Hz)
+    TCCR1B |= (1 << WGM12); // Configure timer 1 for CTC mode
+    TCCR1B |= (1 << CS12) | (1 << CS10); // Set prescaler to 1024
+    TIMSK1 |= (1 << OCIE1A); // Enable timer compare interrupt
+    interrupts(); // Enable interrupts
+}
+
+// Timer 1 ISR for sonar distance checks
+ISR(TIMER1_COMPA_vect) {
+    float distance = getSonarDistance();
+    
+    // Declare a static flag to track if the message has been printed
+    static bool messagePrinted = false;
+    
+    // Check if distance is less than safe distance
+    if (distance < SAFE_DISTANCE) {
+        // Check if the message has not been printed yet
+        if (!messagePrinted) {
+            // Print the message once and set the flag to true
+            Serial.println("Obstacle detected! Stopping the vehicle.");
+            messagePrinted = true;
+        }
+        // Stop the vehicle
+        motorRun(0, 0);
+    } else {
+        // Reset the flag if the distance is above safe distance
+        messagePrinted = false;
+    }
+}
+
+// Function to measure sonar distance
+float getSonarDistance() {
+    digitalWrite(PIN_SONIC_TRIG, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(PIN_SONIC_TRIG, LOW);
+    
+    unsigned long pingTime = pulseIn(PIN_SONIC_ECHO, HIGH, SONIC_TIMEOUT);
+    float distance = 0;
+    if (pingTime != 0) {
+        distance = (float)pingTime * SOUND_VELOCITY / 2 / 10000;
+    } else {
+        distance = MAX_DISTANCE;
+    }
+    
+    return distance;
 }
 
 // Call execute_actions in loop function
@@ -172,7 +232,6 @@ void execute_single_action(char token, uint8_t value) {
 
 // Placeholder functions for execution
 void move(int steps) {
-    // Implement move functionality
     Serial.print("Moving ");
     Serial.print(steps);
     Serial.println(" steps.");
@@ -182,21 +241,51 @@ void move(int steps) {
 }
 
 void turnLeft(int degrees) {
-    // Implement turn left functionality
     Serial.print("Turning left ");
     Serial.print(degrees);
     Serial.println(" degrees.");
+
+    // Determine the turning rate (degrees per second)
+    float turningRate = 90;
+
+    // Calculate the time needed to turn the specified degrees
+    float timeToTurn = degrees / turningRate;
+
+    // Control the motors to turn left
+    // Set the right motor forward and the left motor backward
+    motorRun(-200, 200);
+
+    // Delay for the calculated time
+    delay(timeToTurn * 1000); // Convert time to milliseconds
+
+    // Stop the motors
+    motorRun(0, 0);
 }
 
 void turnRight(int degrees) {
-    // Implement turn right functionality
     Serial.print("Turning right ");
     Serial.print(degrees);
     Serial.println(" degrees.");
+
+    // Determine the turning rate (degrees per second)
+    float turningRate = 90;
+
+    // Calculate the time needed to turn the specified degrees
+    float timeToTurn = degrees / turningRate;
+
+    // Control the motors to turn right
+    // Set the left motor forward and the right motor backward
+    motorRun(200, -200);
+
+    // Delay for the calculated time
+    delay(timeToTurn * 1000); // Convert time to milliseconds
+
+    // Stop the motors
+    motorRun(0, 0);
 }
 
+
 void stop(int seconds) {
-    // Implement stop functionality
     Serial.print("Stopping ");
     Serial.print(seconds);
     Serial.println(" Secounds");
@@ -219,7 +308,7 @@ void motorRun(int speedl, int speedr) {
     dirR = 0 ^ MOTOR_DIRECTION;
     speedr = -speedr;
   }
-    digitalWrite(PIN_DIRECTION_LEFT, dirL);
+  digitalWrite(PIN_DIRECTION_LEFT, dirL);
   digitalWrite(PIN_DIRECTION_RIGHT, dirR);
   analogWrite(PIN_MOTOR_PWM_LEFT, speedl);
   analogWrite(PIN_MOTOR_PWM_RIGHT, speedr);

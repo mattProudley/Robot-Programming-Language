@@ -5,7 +5,7 @@ from file_handling import open_file
 import time
 
 # Define the timeout duration in seconds (e.g., 20 seconds)
-timeout_duration = 20
+timeout_duration = 60
 
 # Store the start time of the operation
 start_time = time.time()

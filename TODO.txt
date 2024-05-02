@@ -1,13 +1,7 @@
 bluetooth functions:
 check for connection loss
-interpret commands over bt
-
-robot functionality:
-preform movements
 send sensor readings
-stop if near object (interrupt)
 stop function
-rerun current program
 
 errors to test:
 contains decimal value: done
