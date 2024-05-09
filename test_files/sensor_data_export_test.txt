@@ -1,0 +1,15 @@
+Robot: Sensor Reading: 48.03
+Robot: Sensor Reading: 49.23
+Robot: Sensor Reading: 48.72
+Robot: Sensor Reading: 48.21
+Robot: Sensor Reading: 117.37
+Robot: Sensor Reading: 117.38
+Robot: Sensor Reading: 116.57
+Robot: Sensor Reading: 117.35
+Robot: Sensor Reading: 117.79
+Robot: Sensor Reading: 117.37
+Robot: Sensor Reading: 117.35
+Robot: Sensor Reading: 117.37
+Robot: Sensor Reading: 117.49
+Robot: Sensor Reading: 117.38
+

@@ -4,7 +4,7 @@ from tkinter import Menu, Text, Scrollbar
 from file_handling import save_file, open_file
 import parser
 import bluetooth
-from utils import set_terminal_reference
+from utils import set_terminal_reference, set_sensor_terminal_reference
 
 class GUI:
     def __init__(self):
@@ -12,6 +12,7 @@ class GUI:
         self.root = tk.Tk()
         self.text_area = None  # Initialize text area as None initially
         self.terminal = None  # Initialize terminal as None initially
+        self.sensor_terminal = None
         self.gui_constructor()  # Build GUI components
         self.setup_bluetooth()  # Set up Bluetooth serial port
 
@@ -69,7 +70,31 @@ class GUI:
         # Create a new window for sensor readings
         sensor_window = tk.Toplevel(self.root)
         sensor_window.title("Sensor Readings")
-        # TODO: Needs contents
+        sensor_window.geometry("400x300")  # Set the size of the pop-up window
+
+        # Create a frame for sensor readings content
+        sensor_frame = tk.Frame(sensor_window, padx=10, pady=10)
+        sensor_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Create a text widget for displaying sensor readings (terminal-like behavior)
+        self.sensor_terminal = Text(sensor_frame, bg="black", fg="white", height=5)
+        self.sensor_terminal.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        set_sensor_terminal_reference(self.sensor_terminal)
+
+        # Create a scrollbar for the sensor terminal
+        self.scrollbar = Scrollbar(sensor_frame, orient=tk.VERTICAL, command=self.sensor_terminal.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.sensor_terminal.config(yscrollcommand=self.scrollbar.set)
+
+        def export_sensor_readings_event():
+            # Retrieve the content of the text widget
+            data = self.sensor_terminal.get("1.0", tk.END)
+            # Pass the data to a file handling function (save_file)
+            save_file(data)
+
+        # Create a button at the bottom of the window to export data from the terminal
+        export_button = tk.Button(sensor_window, text="Export Data", command=export_sensor_readings_event)
+        export_button.pack(side=tk.BOTTOM, pady=10)  #
 
     def open_command_driven_terminal(self):
         # Create a new window for the command-driven terminal

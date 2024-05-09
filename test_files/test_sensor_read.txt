@@ -1,4 +1,4 @@
-
+FOR 10;
 READS;
 STOP 1;
-READS;
+END;

@@ -14,7 +14,7 @@ def setup_serial_port():
     try:
         print_to_terminal("Attempting to connect to serial")
         # Attempt to create a Serial object with the specified parameters
-        serial_port = serial.Serial('COM8', 9600, timeout=1)  # Set port and baud rate
+        serial_port = serial.Serial('COM6', 9600, timeout=1)  # Set port and baud rate
         # If successful, print confirmation to terminal
         print_to_terminal("Successfully connected to serial port")
         return True  # Return True to indicate success
@@ -63,7 +63,7 @@ def _ping_serial():
     global serial_port
     # Convert 'p' to bytes using encode()
     serial_port.write(b'p')  # Send the ping data over the serial port as bytes
-    time.sleep(0.5)
+    time.sleep(1)
     response = serial_port.read()  # Read the response from the serial port
 
     # Convert the response from bytes to string
