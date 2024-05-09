@@ -15,10 +15,7 @@ Data interpretation: Interfaces with an Arduino program that reads tokens,
 Movement Functionality: The robot will preform movements based on the script uploaded.
 For Loop Support: The language includes support for FOR loops, allowing execution of commands multiple times.
     However, it does not currently support nested FOR loops.
-
-Final Version Features:
 Sensor Integration: Retrieve sensor readings from the robot for monitoring and analysis.
-Syntax: Syntax is explained in a file
 
 Future improvements:
 Better error handling using try, except
