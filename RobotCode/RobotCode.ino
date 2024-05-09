@@ -238,6 +238,9 @@ void execute_single_action(char token, uint16_t value) {
         case 'S': // STOP
             stop(value);
             break;
+        case 'r': // read sensor
+            readSensor();
+            break;
         default:
             Serial.print("Unknown token: ");
             Serial.println(token);
@@ -245,7 +248,11 @@ void execute_single_action(char token, uint16_t value) {
     }
 }
 
-
+void readSensor(){
+  float sensorReading = getSonarDistance();
+  Serial.print("Sensor Reading: ");
+  Serial.println(sensorReading);
+}
 void move(int steps) {
     if(steps < 0) {
       Serial.print("Moving back ");

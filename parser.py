@@ -53,7 +53,9 @@ def _compile_patterns():
         # FOR loop command (may or may not include an integer or decimal value)
         r'FOR(?:\s+([-+]?\d+))?',
         # END command (no additional value)
-        r'END'
+        r'END',
+        # READ SENSOR command
+        r'READS'
     ]
 
     # Compile each pattern using regular expressions and return the list of compiled patterns
@@ -69,6 +71,7 @@ def _pattern_match(_compiled_patterns, clean_data):
         'TURNR': validate_turn,
         'STOP': validate_stop,
         'FOR': validate_for,
+        # Sensor command does not require validation
         # END command does not require validation
     }
 
@@ -89,7 +92,7 @@ def _pattern_match(_compiled_patterns, clean_data):
                 cmd_name = re.sub(r'[^A-Z]', '', pattern.pattern)
 
                 # Validate the command value (if required)
-                if cmd_name != 'END':
+                if cmd_name != 'END' and cmd_name != 'READS':
                     try:
                         validators[cmd_name](match.group(1))
                     except ValueError as e:
@@ -180,7 +183,8 @@ def _tokenize(verified_commands):
         'TURNR': 'R',
         'STOP': 'S',
         'FOR': 'f',
-        'END': 'e'
+        'END': 'e',
+        'READS': 'r'
     }
 
     tokens = []  # List to store tokens
