@@ -2,3 +2,7 @@ FOR 4;
     MOV 5;
 	TURNL 90;
 END;
+MOV -10;
+TURNL 360;
+TURNR 360;
+MOV 10;

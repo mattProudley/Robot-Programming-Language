@@ -29,3 +29,4 @@ Mathematics Support
 Optimise compilation algorithms
 In app com port adjustment
 Store and rerun last program
+Control Motor Speed

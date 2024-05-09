@@ -246,7 +246,6 @@ void execute_single_action(char token, uint16_t value) {
 }
 
 
-// Placeholder functions for execution
 void move(int steps) {
     if(steps < 0) {
       Serial.print("Moving back ");
