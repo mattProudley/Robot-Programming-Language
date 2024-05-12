@@ -9,16 +9,16 @@ int arrayLength = 0; // Global variable to track the length of the tokens and va
 char tokens[32];
 uint16_t values[32];
 
-#define PIN_SONIC_TRIG      7 // Pin for sonar trigger
-#define PIN_SONIC_ECHO      8 // Pin for sonar echo
+#define PIN_SONIC_TRIG      7 // Pin for trigger
+#define PIN_SONIC_ECHO      8 // Pin for echo
 #define MOTOR_DIRECTION     1 // If the direction is reversed, change 0 to 1
 #define PIN_DIRECTION_LEFT  4
 #define PIN_DIRECTION_RIGHT 3
 #define PIN_MOTOR_PWM_LEFT  6
 #define PIN_MOTOR_PWM_RIGHT 5
 
-#define MAX_DISTANCE        1000 // Maximum distance for sonar measurement in cm
-#define SONIC_TIMEOUT       (MAX_DISTANCE * 60) // Time out for sonar in microseconds
+#define MAX_DISTANCE        1000 // Maximum distance for measurement in cm
+#define SONIC_TIMEOUT       (MAX_DISTANCE * 60) // Time out in microseconds
 #define SOUND_VELOCITY      340 // Speed of sound in air (340 m/s)
 #define SAFE_DISTANCE       40.0 // Define a safe distance threshold in cm
 
@@ -31,7 +31,7 @@ void setup() {
     pinMode(PIN_SONIC_TRIG, OUTPUT);
     pinMode(PIN_SONIC_ECHO, INPUT);
     
-    // Set up the timer interrupt for sonar distance checks
+    // Set up the timer interrupt for distance checks
     noInterrupts(); // Disable interrupts
     TCCR1A = 0; // Clear register A
     TCCR1B = 0; // Clear register B
@@ -43,9 +43,9 @@ void setup() {
     interrupts(); // Enable interrupts
 }
 
-// Timer 1 ISR for sonar distance checks
+// Timer 1 ISR for  distance checks
 ISR(TIMER1_COMPA_vect) {
-    float distance = getSonarDistance();
+    float distance = getDistance();
     
     // Declare a static flag to track if the message has been printed
     static bool messagePrinted = false;
@@ -66,8 +66,8 @@ ISR(TIMER1_COMPA_vect) {
     }
 }
 
-// Function to measure sonar distance
-float getSonarDistance() {
+// Function to measure distance
+float getDistance() {
     digitalWrite(PIN_SONIC_TRIG, HIGH);
     delayMicroseconds(10);
     digitalWrite(PIN_SONIC_TRIG, LOW);
@@ -249,7 +249,7 @@ void execute_single_action(char token, uint16_t value) {
 }
 
 void readSensor(){
-  float sensorReading = getSonarDistance();
+  float sensorReading = getDistance();
   Serial.print("Sensor Reading: ");
   Serial.println(sensorReading);
 }
